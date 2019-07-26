@@ -234,3 +234,6 @@ tags
 [._]*.un~
 
 # End of https://www.gitignore.io/api/vim,python,pycharm+all
+
+# Dir with instances I used for testing
+test
