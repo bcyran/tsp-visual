@@ -70,9 +70,8 @@ class TSP:
 
         total = 0
 
-        for i, stop in enumerate(path.path):
-            n_stop = path.path[i + 1]
-            total += self.dist(stop, n_stop)
+        for i in range(path.length - 2):
+            total += self.dist(path.path[i], path.path[i + 1])
 
         return total
 
@@ -129,4 +128,6 @@ class Path:
         for stop in self.path:
             string += f'{stop}, '
 
-        return string[:-2]
+        string = string[:-2] + f' ({self.distance})'
+
+        return string
