@@ -70,7 +70,7 @@ class TSP:
 
         total = 0
 
-        for i in range(path.length - 2):
+        for i in range(path.length - 1):
             total += self.dist(path.path[i], path.path[i + 1])
 
         return total
