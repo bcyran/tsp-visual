@@ -8,7 +8,7 @@ class TSP:
     of cities and distance matrix.
     """
 
-    def __init__(self, file):
+    def __init__(self, file=None):
         self.tsplib = None
         self.name = None
         self.comment = None
@@ -59,6 +59,22 @@ class TSP:
         """
 
         return self.distances[i][j]
+
+    def path_dist(self, path):
+        """Calculates total distance of a given path.
+
+        :param Path path: Path to calculate distance of.
+        :return: The distance of a path.
+        :rtype: int
+        """
+
+        total = 0
+
+        for i, stop in enumerate(path.path):
+            n_stop = path.path[i + 1]
+            total += self.dist(stop, n_stop)
+
+        return total
 
 
 class Path:
