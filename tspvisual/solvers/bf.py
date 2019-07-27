@@ -18,11 +18,12 @@ class BFSolver(Solver):
         # Best path
         min_path = deepcopy(path)
         # Create permutations skipping the last stop (return to 0)
-        perms = permutations(path.path[:-1])
+        perms = permutations(path.path[1:-1])
 
         # Loop through all permutations to find the shortest path
         for perm in perms:
             path.path = list(perm)
+            path.path.insert(0, 0)
             path.path.append(0)
             path.distance = self.tsp.path_dist(path)
 
