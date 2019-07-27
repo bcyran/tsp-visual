@@ -123,6 +123,49 @@ class Path:
 
         return False
 
+    def swap(self, i, j):
+        """Swaps cities at a specified path stops.
+
+        :param int i: Index of the first stop.
+        :param int j: Index of the second stop.
+        """
+
+        self.path[i], self.path[j] = self.path[j], self.path[i]
+
+    def insert(self, i, j):
+        """Inserts one stop in the place of the other, shifts other stops.
+
+        :param int i: Index of the first stop.
+        :param int j: Index of the second stop.
+        """
+
+        new_j = self.path[i]
+
+        while i > j:
+            self.path[i] = self.path[i - 1]
+            i = i - 1
+
+        while i < j:
+            self.path[i] = self.path[i + 1]
+            i = i + 1
+
+        self.path[j] = new_j
+
+    def invert(self, i, j):
+        """Reverses order of stops of specified slice of the path.
+
+        :param int i: Index of the first stop.
+        :param int j: Index of the second stop.
+        """
+
+        if i > j:
+            i, j = j, i
+
+        while i < j:
+            self.swap(i, j)
+            i = i + 1
+            j = j - 1
+
     def __str__(self):
         string = ''
         for stop in self.path:
