@@ -12,7 +12,7 @@ class BnBSolver(Solver):
     def solve(self):
         # Working path
         path = Path(self.tsp.dimension + 1)
-        path.path[-1] = 0
+        path.set_stop(-1, 0)
         # Minimal path and distance
         min_path, min_dist = Path(self.tsp.dimension + 1), inf
         # Nodes list (used as a stack)

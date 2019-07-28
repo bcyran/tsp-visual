@@ -1,3 +1,6 @@
+from enum import Enum
+from itertools import permutations, islice
+
 from tspvisual.tsplib import TSPLib
 
 
@@ -9,7 +12,7 @@ class TSP:
     """
 
     def __init__(self, file=None):
-        self.tsplib = None
+        self._tsplib = None
         self.name = None
         self.comment = None
         self.dimension = 0
@@ -20,33 +23,33 @@ class TSP:
             self.load(file)
 
     def load(self, file):
-        """Load TSPLIB file  and read necessary data.
+        """Load TSPLIB file and read necessary data.
 
         :param string file: File to load.
         """
 
-        self.tsplib = TSPLib(file)
+        self._tsplib = TSPLib(file)
 
-        if self.tsplib.specification['TYPE'] not in ['TSP', 'ATSP']:
+        if self._tsplib.specification['TYPE'] not in ['TSP', 'ATSP']:
             raise TypeError('Unsupported problem. Only TSP and ATSP instances '
                             'are supported.')
 
-        self.name = self.tsplib.specification['NAME']
-        self.comment = self.tsplib.specification['COMMENT']
-        self.dimension = self.tsplib.specification['DIMENSION']
-        self.coords = self.tsplib.coords
+        self.name = self._tsplib.specification['NAME']
+        self.comment = self._tsplib.specification['COMMENT']
+        self.dimension = self._tsplib.specification['DIMENSION']
+        self.coords = self._tsplib.coords
 
-        self.calc_distances()
-        del self.tsplib
+        self._calc_distances()
+        del self._tsplib
 
-    def calc_distances(self):
+    def _calc_distances(self):
         """Calculate distance matrix using TSPLib weight function.
         """
 
         for i in range(self.dimension):
             row = []
             for j in range(self.dimension):
-                row.append(self.tsplib.weight(i, j))
+                row.append(self._tsplib.weight(i, j))
             self.distances.append(row)
 
     def dist(self, i, j):
@@ -71,7 +74,7 @@ class TSP:
         total = 0
 
         for i in range(path.length - 1):
-            total += self.dist(path.path[i], path.path[i + 1])
+            total += self.dist(path.get_stop(i), path.get_stop(i + 1))
 
         return total
 
@@ -81,11 +84,18 @@ class Path:
 
     Contains length of the path (number of visited cities), list of
     a consecutive city numbers and optionally path distance.
+
+    List of stops should be accessed only using `set_stop`, `get_stop`,
+    `set_path` and `get_path` methods to avoid incorrect path length due to
+    off-by-one errors.
     """
 
+    # Available path neighbourhood types
+    Neighbourhood = Enum('Neighbourhood', 'SWAP INSERT INVERT')
+
     def __init__(self, length=0):
+        self._path = [-1 for _ in range(length)]
         self.length = length
-        self.path = [-1 for _ in range(length)]
         self.distance = -1
 
     def set_stop(self, index, city):
@@ -95,7 +105,7 @@ class Path:
         :param int city: City number.
         """
 
-        self.path[index] = city
+        self._path[index] = city
 
     def get_stop(self, index):
         """Returns city number in the specified stop.
@@ -105,7 +115,24 @@ class Path:
         :rtype: int
         """
 
-        return self.path[index]
+        return self._path[index]
+
+    def set_path(self, path):
+        """Sets the entire path to given sequence.
+
+        :param list path: List of consecutive stops.
+        """
+
+        if len(path) != self.length:
+            raise ValueError('Incorrect path length.')
+
+        self._path = path
+
+    def get_path(self):
+        """Returns city number sequence.
+        """
+
+        return self._path
 
     def in_path(self, city, limit=None):
         """Checks whether specified city is in the first n elements of the path.
@@ -117,7 +144,7 @@ class Path:
         """
 
         limit = self.length if limit is None else limit
-        for stop in self.path[:limit]:
+        for stop in self._path[:limit]:
             if stop == city:
                 return True
 
@@ -130,7 +157,7 @@ class Path:
         :param int j: Index of the second stop.
         """
 
-        self.path[i], self.path[j] = self.path[j], self.path[i]
+        self._path[i], self._path[j] = self._path[j], self._path[i]
 
     def insert(self, i, j):
         """Inserts one stop in the place of the other, shifts other stops.
@@ -139,17 +166,17 @@ class Path:
         :param int j: Index of the second stop.
         """
 
-        new_j = self.path[i]
+        new_j = self._path[i]
 
         while i > j:
-            self.path[i] = self.path[i - 1]
+            self._path[i] = self._path[i - 1]
             i = i - 1
 
         while i < j:
-            self.path[i] = self.path[i + 1]
+            self._path[i] = self._path[i + 1]
             i = i + 1
 
-        self.path[j] = new_j
+        self._path[j] = new_j
 
     def invert(self, i, j):
         """Reverses order of stops of specified slice of the path.
@@ -168,7 +195,7 @@ class Path:
 
     def __str__(self):
         string = ''
-        for stop in self.path:
+        for stop in self._path:
             string += f'{stop}, '
 
         string = string[:-2] + f' ({self.distance})'

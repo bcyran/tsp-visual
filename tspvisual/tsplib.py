@@ -1,7 +1,5 @@
 from math import sqrt
 
-int_properties = ['DIMENSION', 'CAPACITY']
-
 
 class TSPLib:
     """Simple parser for TSPLIB files.
@@ -10,8 +8,10 @@ class TSPLib:
     equal to EUC_2D.
     """
 
+    _INT_PROPERTIES = ['DIMENSION', 'CAPACITY']
+
     def __init__(self, file):
-        self.lines = []
+        self._lines = []
         self.specification = {}
         self.coords = []
 
@@ -24,27 +24,27 @@ class TSPLib:
         :param string file: File to load.
         """
         with open(file, 'r') as f:
-            self.lines = f.read().splitlines()
+            self._lines = f.read().splitlines()
 
-        self.parse()
+        self._parse()
 
-    def parse(self):
+    def _parse(self):
         """Parse lines from loaded file.
         """
 
-        for i in range(len(self.lines)):
-            line = self.lines[i]
+        for i in range(len(self._lines)):
+            line = self._lines[i]
             if ':' in line:
                 key, value = line.split(':', 1)
                 key, value = key.strip(), value.strip()
-                value = int(value) if key in int_properties else value
+                value = int(value) if key in self._INT_PROPERTIES else value
                 self.specification[key] = value
             elif line.startswith('NODE_COORD_SECTION'):
-                i = self.parse_coords(i + 1)
+                i = self._parse_coords(i + 1)
 
-        del self.lines
+        del self._lines
 
-    def parse_coords(self, i):
+    def _parse_coords(self, i):
         """Parse contents of NODE_COORD_SECTION.
 
         :param int i: Index of first line containing coordinates.
@@ -54,7 +54,7 @@ class TSPLib:
 
         coords_end = i + self.specification['DIMENSION']
         for i in range(i, coords_end):
-            line = self.lines[i]
+            line = self._lines[i]
             _, x, y = line.split()
             self.coords.append((float(x), float(y)))
 
@@ -71,11 +71,11 @@ class TSPLib:
         """
 
         if self.specification['EDGE_WEIGHT_TYPE'] == 'EUC_2D':
-            return self.w_euc_2d(i, j)
+            return self._w_euc_2d(i, j)
         else:
             raise TypeError('Unsupported edge weight type.')
 
-    def w_euc_2d(self, i, j):
+    def _w_euc_2d(self, i, j):
         """Calculates euclidean distance between nodes.
         """
 
