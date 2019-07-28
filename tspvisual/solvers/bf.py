@@ -12,7 +12,7 @@ class BFSolver(Solver):
     def solve(self):
         # Create starting path: 0, 1, 2, ..., 0, this path will be permuted
         path = Path(self.tsp.dimension + 1)
-        path.path = [i for i in range(path.length)]
+        path.path = list(range(path.length))
         path.path[-1] = 0
         path.distance = self.tsp.path_dist(path)
         # Best path
@@ -22,9 +22,7 @@ class BFSolver(Solver):
 
         # Loop through all permutations to find the shortest path
         for perm in perms:
-            path.path = list(perm)
-            path.path.insert(0, 0)
-            path.path.append(0)
+            path.path = [0] + list(perm) + [0]
             path.distance = self.tsp.path_dist(path)
 
             if path.distance < min_path.distance:

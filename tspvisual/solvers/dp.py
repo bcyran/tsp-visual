@@ -35,8 +35,7 @@ class DPSolver(Solver):
             return self.mem[city][visited]
 
         # Current minimal distance and city
-        min_dist = inf
-        min_city = -1
+        min_dist, min_city = inf, -1
 
         # Iterate through all unvisited cities
         for i in range(self.tsp.dimension):
@@ -46,13 +45,12 @@ class DPSolver(Solver):
             # If i city wasn't visited
             if not visited & mask:
                 # Mask current node and enter the next recursion level
-                dist = self.tsp.dist(city, i)
-                dist += self.held_karp(i, visited | mask)
+                dist = self.tsp.dist(city, i) \
+                     + self.held_karp(i, visited | mask)
 
                 # Keep the new distance if it's shorter than current minimum
                 if dist < min_dist:
-                    min_dist = dist
-                    min_city = i
+                    min_dist, min_city = dist, i
 
         self.pred[city][visited] = min_city
         self.mem[city][visited] = min_dist
@@ -65,9 +63,7 @@ class DPSolver(Solver):
         res_path.distance = self.held_karp(0, 1)
 
         # Retrace path of the recursion using predecessors array
-        city = 0
-        visited = 1
-        i = 0
+        city, visited, i = 0, 1, 0
         while True:
             res_path.set_stop(i, city)
             city = self.pred[city][visited]

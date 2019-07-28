@@ -14,10 +14,9 @@ class BnBSolver(Solver):
         path = Path(self.tsp.dimension + 1)
         path.path[-1] = 0
         # Minimal path and distance
-        min_path = Path(self.tsp.dimension + 1)
-        min_dist = inf
-        # Nodes stack
-        stack = list()
+        min_path, min_dist = Path(self.tsp.dimension + 1), inf
+        # Nodes list (used as a stack)
+        stack = []
 
         # Add starting city (0) to the stack
         stack.append((0, 0, 0))
@@ -37,8 +36,7 @@ class BnBSolver(Solver):
                 new_dist = dist + self.tsp.dist(city, 0)
                 # Keep it if it's better than the current minimum
                 if new_dist < min_dist:
-                    min_path = deepcopy(path)
-                    min_dist = new_dist
+                    min_path, min_dist = deepcopy(path), new_dist
                 else:
                     continue
 
@@ -48,7 +46,7 @@ class BnBSolver(Solver):
                 if i == city or path.in_path(i, next_level) or i == 0:
                     continue
 
-                # Skip this node if it's distance is greater than min path
+                # Skip this node if its distance is greater than min path
                 next_dist = dist + self.tsp.dist(city, i)
                 if next_dist >= min_dist:
                     continue

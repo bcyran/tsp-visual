@@ -32,8 +32,7 @@ class TSPLib:
         """Parse lines from loaded file.
         """
 
-        i = 0
-        while i < len(self.lines):
+        for i in range(len(self.lines)):
             line = self.lines[i]
             if ':' in line:
                 key, value = line.split(':', 1)
@@ -42,7 +41,6 @@ class TSPLib:
                 self.specification[key] = value
             elif line.startswith('NODE_COORD_SECTION'):
                 i = self.parse_coords(i + 1)
-            i = i + 1
 
         del self.lines
 
@@ -55,11 +53,10 @@ class TSPLib:
         """
 
         coords_end = i + self.specification['DIMENSION']
-        while i < coords_end:
+        for i in range(i, coords_end):
             line = self.lines[i]
             _, x, y = line.split()
             self.coords.append((float(x), float(y)))
-            i = i + 1
 
         return i
 
