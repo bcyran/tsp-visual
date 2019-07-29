@@ -17,7 +17,26 @@ class DPSolver(Solver):
                     for _ in range(self.tsp.dimension)]
         self.pred = deepcopy(self.mem)
 
-    def held_karp(self, city, visited):
+    def solve(self):
+        # Result path
+        res_path = Path(self.tsp.dimension + 1)
+        # Run Held-Karp algorithm
+        res_path.distance = self._held_karp(0, 1)
+
+        # Retrace path of the recursion using predecessors array
+        city, visited, i = 0, 1, 0
+        while True:
+            res_path.set_stop(i, city)
+            city = self.pred[city][visited]
+            if city == -1:
+                break
+            visited = visited | (1 << city)
+            i = i + 1
+
+        res_path.set_stop(i + 1, 0)
+        return res_path
+
+    def _held_karp(self, city, visited):
         """Implements recursive Held-Karp algorithm.
 
         :param int city: Current city number.
@@ -46,7 +65,7 @@ class DPSolver(Solver):
             if not visited & mask:
                 # Mask current node and enter the next recursion level
                 dist = self.tsp.dist(city, i) \
-                     + self.held_karp(i, visited | mask)
+                     + self._held_karp(i, visited | mask)
 
                 # Keep the new distance if it's shorter than current minimum
                 if dist < min_dist:
@@ -55,22 +74,3 @@ class DPSolver(Solver):
         self.pred[city][visited] = min_city
         self.mem[city][visited] = min_dist
         return min_dist
-
-    def solve(self):
-        # Result path
-        res_path = Path(self.tsp.dimension + 1)
-        # Run Held-Karp algorithm
-        res_path.distance = self.held_karp(0, 1)
-
-        # Retrace path of the recursion using predecessors array
-        city, visited, i = 0, 1, 0
-        while True:
-            res_path.set_stop(i, city)
-            city = self.pred[city][visited]
-            if city == -1:
-                break
-            visited = visited | (1 << city)
-            i = i + 1
-
-        res_path.set_stop(i + 1, 0)
-        return res_path
