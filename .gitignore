@@ -235,5 +235,5 @@ tags
 
 # End of https://www.gitignore.io/api/vim,python,pycharm+all
 
-# Dir with instances I used for testing
-test
+# All tmp test dirs and files
+tmp-*
