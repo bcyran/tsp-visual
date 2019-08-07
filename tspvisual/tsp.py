@@ -1,5 +1,5 @@
 from enum import Enum
-from itertools import permutations, islice
+from itertools import islice, permutations
 
 from tspvisual.tsplib import TSPLib
 
@@ -192,6 +192,23 @@ class Path:
             self.swap(i, j)
             i = i + 1
             j = j - 1
+
+    def move(self, neigh, i, j):
+        """Performs move specified by a given neighbourhood type on i, j stops
+        in this path.
+
+        :param Neighbourhood neigh: Neighbourhood type.
+        :param int i: Index of the first stop.
+        :param int j: Index of the second stop.
+        """
+
+        moves = {
+            self.Neighbourhood.SWAP: self.swap,
+            self.Neighbourhood.INSERT: self.insert,
+            self.Neighbourhood.INVERT: self.invert
+        }
+
+        moves[neigh](i, j)
 
     def __str__(self):
         string = ''
