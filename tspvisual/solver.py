@@ -1,6 +1,3 @@
-from tspvisual.tsp import Path
-
-
 class Solver:
     """TSP solver base class. It stores current TSP instance and defines
     abstract solve method

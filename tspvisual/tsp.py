@@ -1,5 +1,4 @@
 from enum import Enum
-from itertools import islice, permutations
 
 from tspvisual.tsplib import TSPLib
 
