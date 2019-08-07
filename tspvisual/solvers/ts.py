@@ -20,8 +20,8 @@ class TSSolver(Solver):
         self.reset_threshold = 45
         self.stop_threshold = 450
         self.run_time = 0
-        self.tabu = [[0 for _ in range(self.tsp.dimension)]
-                     for _ in range(self.tsp.dimension)]
+        self._tabu = [[0 for _ in range(self.tsp.dimension)]
+                      for _ in range(self.tsp.dimension)]
 
     def solve(self):
         # Starting path from a greedy solver
@@ -37,7 +37,7 @@ class TSSolver(Solver):
         # Timestamp when search should be ended
         end_time = self._millis() + self.run_time
 
-        for i in range(self.iterations):
+        for _ in range(self.iterations):
             # Find best neighbour of the current path
             cur_path = self._min_neighbour(cur_path)
 
@@ -86,7 +86,7 @@ class TSSolver(Solver):
                     continue
 
             # Skip tabu moves
-            if self.tabu[i][j]:
+            if self._tabu[i][j]:
                 continue
 
             # Perform the move
@@ -101,8 +101,8 @@ class TSSolver(Solver):
 
         # Tabu found move
         if best_move:
-            self.tabu[best_move[0]][best_move[1]] = self.cadence
-            self.tabu[best_move[1]][best_move[0]] = self.cadence
+            self._tabu[best_move[0]][best_move[1]] = self.cadence
+            self._tabu[best_move[1]][best_move[0]] = self.cadence
 
         # In small instances it can happen all neighbours are already on tabu
         # list, if that happens we cannot return an empty path
@@ -113,8 +113,8 @@ class TSSolver(Solver):
         """
 
         for i, j in product(range(self.tsp.dimension), repeat=2):
-            if self.tabu[i][j] > 0:
-                self.tabu[i][j] -= 1
+            if self._tabu[i][j] > 0:
+                self._tabu[i][j] -= 1
 
     def _millis(self):
         """Returns current timestamp in milliseconds.
