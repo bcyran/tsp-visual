@@ -61,7 +61,6 @@ class TSSolver(Solver):
             if self.run_time and self._millis() > end_time:
                 break
 
-        # FIXME: Returned paths are slightly shorter (?!) than optimal
         return min_path
 
     def _min_neighbour(self, path):

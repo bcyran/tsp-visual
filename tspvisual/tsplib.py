@@ -162,4 +162,15 @@ class TSPLib:
 
         xd = self.coords[i][0] - self.coords[j][0]
         yd = self.coords[i][1] - self.coords[j][1]
-        return int(sqrt(xd ** 2 + yd ** 2))
+        return self._nint(sqrt(xd ** 2 + yd ** 2))
+
+    @staticmethod
+    def _nint(x):
+        """Rounds number to the nearest integer.
+
+        :param float x: Number to round.
+        :return: Nearest integer.
+        :rtype int:
+        """
+
+        return int(x + 0.5)
