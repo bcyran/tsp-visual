@@ -11,7 +11,7 @@ class TSPLib:
     # Names of properties of integer type (all others are strings)
     _INT_PROPERTIES = ['DIMENSION', 'CAPACITY']
 
-    def __init__(self, file):
+    def __init__(self, file=None):
         self._lines = []
         self.specification = {}
         self.coords = []
@@ -128,9 +128,11 @@ class TSPLib:
             elif matrix == 'LOWER' and direction == 'COL':
                 col, row = calc(col, row, size - 1, col + 1 + offset)
             elif matrix == 'LOWER' and direction == 'ROW':
-                row, col = calc(row, col, max(row - offset, 0), 0)
+                row, col = calc(
+                    row, col, row - offset if offset else max(row, 0), 0)
             elif matrix == 'UPPER' and direction == 'COL':
-                col, row = calc(col, row, max(row - offset, 0), 0)
+                col, row = calc(
+                    col, row, col - offset if offset else max(col, 0), 0)
 
             # End when all coordinates are generated
             if row >= size or col >= size:

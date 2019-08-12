@@ -56,7 +56,7 @@ class TestTSPLib(unittest.TestCase):
             with self.subTest(form=form):
                 self.tsplib.specification['EDGE_WEIGHT_FORMAT'] = form
                 result = list(self.tsplib._cells())
-                self.assertListEqual(result, expected)
+                self.assertListEqual(expected, result)
 
 
 if __name__ == '__main__':
