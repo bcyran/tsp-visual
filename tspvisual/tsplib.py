@@ -1,18 +1,33 @@
 from math import sqrt
 
 
+class Lines:
+    """Iterable wrapper allowing to access current item.
+    """
+
+    def __init__(self, lines):
+        self.lines = iter(lines)
+        self.current = next(self.lines)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.current = next(self.lines)
+        return self.current
+
+
 class TSPLib:
     """Simple parser for TSPLIB files.
 
-    This parser currently supports only TSP instances which EDGE_WEIGHT_TYPE
-    equal to EUC_2D.
+    Supports instances with EDGE_WEIGHT_FORMAT: EXPLICIT and EUC_2D.
     """
 
     # Names of properties of integer type (all others are strings)
     _INT_PROPERTIES = ['DIMENSION', 'CAPACITY']
 
     def __init__(self, file=None):
-        self._lines = []
+        self._lines = None
         self.specification = {}
         self.coords = []
         self.weights = None
@@ -21,47 +36,72 @@ class TSPLib:
             self.load(file)
 
     def load(self, file):
-        """Loads lines from file, creates an iterator and starts parsing.
+        """Loads lines from file, creates Lines iterable and starts parsing.
 
         :param string file: File to load.
         """
 
         with open(file, 'r') as f:
-            self._lines = iter(f.read().splitlines())
+            self._lines = Lines(f.read().splitlines())
 
         self._parse()
 
     def _parse(self):
-        """Parses lines from loaded file.
+        """Iterates over lines and calls appropriate parses for each section
+        of the file.
         """
 
-        for line in self._lines:
-            if ':' in line:
-                key, value = line.split(':', 1)
-                key, value = key.strip(), value.strip()
-                value = int(value) if key in self._INT_PROPERTIES else value
-                self.specification[key] = value
-            elif line.startswith('NODE_COORD_SECTION'):
-                self._parse_coords()
-            elif line.startswith('EDGE_WEIGHT_SECTION'):
-                self._parse_weights()
+        self.specification = {}
+
+        while True:
+            try:
+                line = self._lines.current
+                if ':' in line:
+                    self._parse_spec()
+                elif line.startswith('NODE_COORD_SECTION'):
+                    next(self._lines)
+                    self._parse_coords()
+                elif line.startswith('EDGE_WEIGHT_SECTION'):
+                    next(self._lines)
+                    self._parse_weights()
+                else:
+                    break
+            except StopIteration:
+                break
 
         del self._lines
+
+    def _parse_spec(self):
+        """Pases single line containing instance specification.
+        """
+
+        key, value = self._lines.current.split(':', 1)
+        key, value = key.strip(), value.strip()
+        value = int(value) if key in self._INT_PROPERTIES else value
+        self.specification[key] = value
+
+        try:
+            next(self._lines)
+        except StopIteration:
+            pass
 
     def _parse_coords(self):
         """Parses contents of NODE_COORD_SECTION.
         """
 
-        for line in self._lines:
+        self.coords = []
+
+        while True:
             try:
-                _, x, y = line.split()
+                _, x, y = self._lines.current.split()
+                self.coords.append((float(x), float(y)))
             except ValueError:
                 break
 
             try:
-                self.coords.append((float(x), float(y)))
-            except ValueError:
-                raise ValueError('Incorrect node coordinates')
+                next(self._lines)
+            except StopIteration:
+                break
 
     def _parse_weights(self):
         """Parses contents of EDGE_WEIGHT_SECTION.
@@ -71,19 +111,22 @@ class TSPLib:
         self.weights = [[-1 for _ in range(self.specification['DIMENSION'])]
                         for _ in range(self.specification['DIMENSION'])]
 
-        for (row, col), weight in zip(self._cells(), self._weights()):
-            self.weights[row][col] = weight
+        # Cell coordinates iterator
+        cells = self._cells()
 
-    def _weights(self):
-        """Generates consecutive edge weights read from the file.
-        """
-
-        for line in self._lines:
-            for value in line.split():
+        while True:
+            for value in self._lines.current.split():
                 try:
-                    yield int(value)
-                except ValueError:
-                    break
+                    weight = int(value)
+                    row, col = next(cells)
+                    self.weights[row][col] = weight
+                except (ValueError, StopIteration):
+                    return
+
+            try:
+                next(self._lines)
+            except StopIteration:
+                break
 
     def _cells(self):
         """Generates consecutive matrix cells coordinates.
