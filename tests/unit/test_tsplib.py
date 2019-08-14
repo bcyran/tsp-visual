@@ -75,8 +75,14 @@ class TestTSPLib(unittest.TestCase):
                 self.assertEqual(self.tsplib.specification[key], expected)
 
     def test_parse_coords(self):
-        data = ['1 1 1', '2	2	5', '    3    4    9', '4 5.3 7',
-                '5 9.7 10.1', 'EOF']
+        data = [
+            '1 1 1',
+            '2	2	5',
+            '    3    4    9',
+            '4 5.3 7',
+            '5 9.7 10.1',
+            'EOF'
+        ]
         expected = [(1, 1), (2, 5), (4, 9), (5.3, 7), (9.7, 10.1)]
 
         self.tsplib._lines = Lines(data)
@@ -86,11 +92,18 @@ class TestTSPLib(unittest.TestCase):
         self.assertEqual(self.tsplib._lines.current, data[-1])
 
     def test_parse_weights(self):
-        data = ['0 2 3 4', ' 5    0 7 8', '9 10 0 12 13 14 15 0', 'EOF']
-        expected = [[0,  2,  3,  4],
-                    [5,  0,  7,  8],
-                    [9,  10, 0, 12],
-                    [13, 14, 15, 0]]
+        data = [
+            '0 2 3 4',
+            ' 5    0 7 8',
+            '9 10 0 12 13 14 15 0',
+            'EOF'
+        ]
+        expected = [
+            [0,  2,  3,  4],
+            [5,  0,  7,  8],
+            [9,  10, 0, 12],
+            [13, 14, 15, 0]
+        ]
 
         self.tsplib.specification = {
             'DIMENSION': len(expected),
@@ -103,9 +116,18 @@ class TestTSPLib(unittest.TestCase):
         self.assertEqual(self.tsplib._lines.current, data[-1])
 
     def test_parse(self):
-        data = ['DIMENSION : 3', 'EDGE_WEIGHT_FORMAT : FULL_MATRIX',
-                'EDGE_WEIGHT_SECTION', '1 2 3 4 5', '6 7 8 9',
-                'NODE_COORD_SECTION', '1 1 1', '2 4 5', '3 4.20 69.9', 'EOF']
+        data = [
+            'DIMENSION : 3',
+            'EDGE_WEIGHT_FORMAT : FULL_MATRIX',
+            'EDGE_WEIGHT_SECTION',
+            '1 2 3 4 5',
+            '6 7 8 9',
+            'NODE_COORD_SECTION',
+            '1 1 1',
+            '2 4 5',
+            '3 4.20 69.9',
+            'EOF'
+        ]
         expected_spec = {'DIMENSION': 3, 'EDGE_WEIGHT_FORMAT': 'FULL_MATRIX'}
         expected_weigths = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         expected_coords = [(1, 1), (4, 5), (4.2, 69.9)]
@@ -119,7 +141,13 @@ class TestTSPLib(unittest.TestCase):
         self.assertListEqual(self.tsplib.coords, expected_coords)
 
     def test_nint(self):
-        data = [(1.0, 1), (2.1, 2), (3.4, 3), (4.5, 5), (5.6, 6)]
+        data = [
+            (1.0, 1),
+            (2.1, 2),
+            (3.4, 3),
+            (4.5, 5),
+            (5.6, 6)
+        ]
 
         for num, expected in data:
             with self.subTest(num=num):
@@ -128,9 +156,21 @@ class TestTSPLib(unittest.TestCase):
                 self.assertIsInstance(result, int)
 
     def test_w_euc_2d(self):
-        coords = [(1, 1), (5, 5), (8, 15), (-50, 10), (-1000, -1000)]
-        data = [(0, 1, 6), (1, 0, 6), (2, 1, 10), (2, 3, 58),
-                (0, 4, 1416), (3, 4, 1387)]
+        coords = [
+            (1, 1),
+            (5, 5),
+            (8, 15),
+            (-50, 10),
+            (-1000, -1000)
+        ]
+        data = [
+            (0, 1, 6),
+            (1, 0, 6),
+            (2, 1, 10),
+            (2, 3, 58),
+            (0, 4, 1416),
+            (3, 4, 1387)
+        ]
 
         self.tsplib.coords = coords
 
@@ -141,10 +181,16 @@ class TestTSPLib(unittest.TestCase):
                 self.assertIsInstance(result, int)
 
     def test_weight(self):
-        weights = [[0,  2,  3],
-                   [4,  0,  6],
-                   [-1, 8, 0]]
-        coords = [(0, 1, 2), (1, 2, 1), (2, -2, 0)]
+        weights = [
+            [0,  2,  3],
+            [4,  0,  6],
+            [-1, 8, 0]
+        ]
+        coords = [
+            (0, 1, 2),
+            (1, 2, 1),
+            (2, -2, 0)
+        ]
         data = [
             ('EXPLICIT', 2, 1, 8),
             ('EXPLICIT', 2, 0, 3),
