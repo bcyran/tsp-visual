@@ -1,4 +1,7 @@
-class Solver:
+import abc
+
+
+class Solver(abc.ABC):
     """TSP solver base class. It stores current TSP instance and defines
     abstract solve method
     """
@@ -6,6 +9,7 @@ class Solver:
     def __init__(self, tsp=None):
         self.tsp = tsp
 
+    @abc.abstractmethod
     def solve(self):
         """Solve current TSP instance.
 
@@ -13,4 +17,4 @@ class Solver:
         :rtype: Path
         """
 
-        raise NotImplementedError()
+        raise NotImplementedError('Solvers must implement solve method.')
