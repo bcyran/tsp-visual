@@ -1,4 +1,5 @@
 from enum import Enum
+from random import shuffle
 
 from tspvisual.tsplib import TSPLib
 
@@ -132,6 +133,17 @@ class Path:
         """
 
         return self._path
+
+    def shuffle(self, i, j):
+        """Shuffles specified slice of the path.
+
+        :param int i: Index of the first stop in the slice.
+        :param int j: Index of the last stop in the slice.
+        """
+
+        part = self._path[i:j]
+        shuffle(part)
+        self._path[i:j] = part
 
     def in_path(self, city, limit=None):
         """Checks whether specified city is in the first n elements of the path.

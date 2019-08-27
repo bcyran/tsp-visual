@@ -1,4 +1,5 @@
 import unittest
+from copy import deepcopy
 from unittest.mock import patch
 
 from tspvisual.tsp import TSP, Path, TSPLib
@@ -103,6 +104,31 @@ class TestPath(unittest.TestCase):
                 path._path = p
                 result = path.get_path()
                 self.assertListEqual(result, p)
+
+    def test_shuffle(self):
+        data = [
+            ([0, 1, 2, 3, 4, 5, 6, 7], 2, 5),
+            ([0, 1, 2, 3, 3, 5, 6, 0], 1, -1),
+            ([5, 4, 3, 2, 1], 0, 4),
+            ([1, 2, 3], 0, 2),
+            ([], 0, 0)
+        ]
+
+        for p, i, j in data:
+            with self.subTest(path=p, i=i, j=j):
+                path = Path(len(p))
+                path.set_path(deepcopy(p))
+                path.shuffle(i, j)
+                print(path.get_path())
+                print(p)
+
+                # Make sure no elements are lost or added
+                for n in p:
+                    self.assertEqual(path.get_path().count(n), p.count(n))
+
+                # Compare slices that shouldn't be shuffled
+                self.assertListEqual(path.get_path()[0:i], p[0:i])
+                self.assertListEqual(path.get_path()[j:-1], p[j:-1])
 
     def test_in_path(self):
         data = [
