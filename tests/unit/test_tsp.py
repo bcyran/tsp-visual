@@ -45,8 +45,7 @@ class TestPath(unittest.TestCase):
     def test_get_stop(self):
         data = [2, 7, 4, 3, 5, 1]
 
-        path = Path(6)
-        path._path = data
+        path = Path(path=data)
 
         for index, value in enumerate(data):
             with self.subTest(index=index):
@@ -116,11 +115,8 @@ class TestPath(unittest.TestCase):
 
         for p, i, j in data:
             with self.subTest(path=p, i=i, j=j):
-                path = Path(len(p))
-                path.set_path(deepcopy(p))
+                path = Path(path=deepcopy(p))
                 path.shuffle(i, j)
-                print(path.get_path())
-                print(p)
 
                 # Make sure no elements are lost or added
                 for n in p:
@@ -144,8 +140,7 @@ class TestPath(unittest.TestCase):
             (10, 3, False)
         ]
 
-        path = Path(6)
-        path.set_path([4, 1, 8, 2, 9, 7])
+        path = Path(path=[4, 1, 8, 2, 9, 7])
 
         for city, limit, expected in data:
             with self.subTest(city=city, limit=limit):
@@ -162,8 +157,7 @@ class TestPath(unittest.TestCase):
             (4, 4, [3, 4, 2, 6, 1, 5])
         ]
 
-        path = Path(6)
-        path.set_path([1, 2, 3, 4, 5, 6])
+        path = Path(path=[1, 2, 3, 4, 5, 6])
 
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
@@ -181,8 +175,7 @@ class TestPath(unittest.TestCase):
             (4, 4, [2, 3, 5, 4, 1, 6])
         ]
 
-        path = Path(6)
-        path.set_path([1, 2, 3, 4, 5, 6])
+        path = Path(path=[1, 2, 3, 4, 5, 6])
 
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
@@ -200,8 +193,7 @@ class TestPath(unittest.TestCase):
             (4, 4, [3, 4, 6, 1, 2, 5])
         ]
 
-        path = Path(6)
-        path.set_path([1, 2, 3, 4, 5, 6])
+        path = Path(path=[1, 2, 3, 4, 5, 6])
 
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
@@ -216,8 +208,7 @@ class TestPath(unittest.TestCase):
             (Path.Neighbourhood.INVERT, 1, 4, [1, 5, 2, 4, 3, 6])
         ]
 
-        path = Path(6)
-        path.set_path([1, 2, 3, 4, 5, 6])
+        path = Path(path=[1, 2, 3, 4, 5, 6])
 
         for neigh, i, j, expected in data:
             with self.subTest(neigh=neigh, i=i, j=j):

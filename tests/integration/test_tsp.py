@@ -41,7 +41,6 @@ class TestTSP(unittest.TestCase):
 
         for p, expected in data:
             with self.subTest(path=p):
-                path = Path(len(p))
-                path.set_path(p)
+                path = Path(path=p)
                 result = self.tsp.path_dist(path)
                 self.assertEqual(result, expected)
