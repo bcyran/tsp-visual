@@ -38,7 +38,7 @@ class SASolver(Solver):
         # Repeat as long as system temperature is higher than minimum
         while True:
             # Get random neighbour of current path
-            new_path = self.rand_neigh(cur_path)
+            new_path = self._rand_neigh(cur_path)
 
             # Difference between current and new path
             delta_dist = new_path.distance - cur_path.distance
@@ -67,7 +67,7 @@ class SASolver(Solver):
 
         return min_path
 
-    def rand_neigh(self, path):
+    def _rand_neigh(self, path):
         """Generates random neighbour of a given path.
 
         :param Path path: Path to generate neighbour of.
