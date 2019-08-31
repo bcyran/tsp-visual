@@ -116,8 +116,43 @@ class GASolver(Solver):
         return child
 
     def _crossover_pmx(self, parent1, parent2):
-        # TODO: Implement
-        pass
+        """Performs partially matched crossover to create a child path from to
+        given parent paths.
+        """
+
+        # Starting path
+        child = Path(self.tsp.dimension + 1)
+
+        # Create mapping array and initialize with -1
+        mapping = [-1] * (self.tsp.dimension + 1)
+
+        # Copy random subpath from parent 1 to child and create mapping
+        start, end = self._rand_subpath()
+        for i in range(start, end+1):
+            child.set_stop(i, parent1.get_stop(i))
+            mapping[parent1.get_stop(i)] = parent2.get_stop(i)
+
+        # Copy stops from parent 2 to child using mapping if necessary
+        child_pos = 0
+        while child_pos < self.tsp.dimension + 1:
+            # Skip already filled subpath
+            if start <= child_pos <= end:
+                child_pos = end + 1
+                continue
+
+            # Get city at current stop in parent 2
+            value = parent2.get_stop(child_pos)
+
+            # Trace mapping if it exists
+            while mapping[value] != -1:
+                value = mapping[value]
+
+            # Set stop in the child path
+            child.set_stop(child_pos, value)
+            child_pos += 1
+
+        child.distance = self.tsp.path_dist(child)
+        return child
 
     def _crossover_nwox(self, parent1, parent2):
         # TODO: Implement
