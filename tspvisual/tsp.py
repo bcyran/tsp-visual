@@ -94,7 +94,7 @@ class Path:
     Neighbourhood = Enum('Neighbourhood', 'SWAP INSERT INVERT')
 
     def __init__(self, length=0, path=None):
-        self._path = [-1 for _ in range(length)] if path is None else path
+        self._path = [-1] * length if path is None else path
         self.length = length if path is None else len(path)
         self.distance = -1
 

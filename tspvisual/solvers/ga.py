@@ -85,15 +85,15 @@ class GASolver(Solver):
 
         # Copy random subpath from parent 1 to child
         start, end = self._rand_subpath()
-        for i in range(start, end):
+        for i in range(start, end+1):
             child.set_stop(i, parent1.get_stop(i))
 
         # Fill in child's empty slots with cities from parent 2 in order
         parent_pos = child_pos = 0
         while parent_pos < self.tsp.dimension + 1:
             # Skip already filled subpath
-            if start <= child_pos < end:
-                child_pos = end
+            if start <= child_pos <= end:
+                child_pos = end + 1
                 continue
 
             # Get city from parent path
