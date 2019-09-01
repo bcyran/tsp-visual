@@ -116,19 +116,24 @@ class GASolver(Solver):
         return child
 
     def _crossover_pmx(self, parent1, parent2):
-        """Performs partially matched crossover to create a child path from to
+        """Performs partially matched crossover to create a child path from two
         given parent paths.
+
+        :param Path parent1: First parent path.
+        :param Path parent2: Second parent path.
+        :return: Child path.
+        :rtype: Path
         """
 
         # Starting path
         child = Path(self.tsp.dimension + 1)
 
-        # Create mapping array and initialize with -1
-        mapping = [-1] * (self.tsp.dimension + 1)
+        # Create mapping dict
+        mapping = {}
 
         # Copy random subpath from parent 1 to child and create mapping
         start, end = self._rand_subpath()
-        for i in range(start, end+1):
+        for i in range(start, end + 1):
             child.set_stop(i, parent1.get_stop(i))
             mapping[parent1.get_stop(i)] = parent2.get_stop(i)
 
