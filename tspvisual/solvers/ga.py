@@ -146,22 +146,63 @@ class GASolver(Solver):
                 continue
 
             # Get city at current stop in parent 2
-            value = parent2.get_stop(child_pos)
+            city = parent2.get_stop(child_pos)
 
             # Trace mapping if it exists
-            while mapping[value] != -1:
-                value = mapping[value]
+            while city in mapping:
+                city = mapping[city]
 
             # Set stop in the child path
-            child.set_stop(child_pos, value)
+            child.set_stop(child_pos, city)
             child_pos += 1
 
         child.distance = self.tsp.path_dist(child)
         return child
 
     def _crossover_nwox(self, parent1, parent2):
-        # TODO: Implement
-        pass
+        """Performs non wrapping order crossover to create a child path from
+        two given parents paths.
+
+        :param Path parent1: First parent path.
+        :param Path parent2: Second parent path.
+        :return: Child path.
+        :rtype: Path
+        """
+
+        # Initial child path
+        child = Path(self.tsp.dimension + 1)
+
+        # Copy random subpath from parent 1 to child
+        start, end = self._rand_subpath()
+        for i in range(start, end+1):
+            child.set_stop(i, parent1.get_stop(i))
+
+        # Fill in child's empty slots with cities from parent 2 in order
+        parent_pos = child_pos = 0
+        while parent_pos < self.tsp.dimension + 1:
+            # Skip already filled subpath
+            if start <= child_pos <= end:
+                child_pos = end + 1
+                continue
+
+            # Get city from parent path
+            parent_city = parent2.get_stop(parent_pos)
+            if child.in_path(parent_city):
+                # If this city is already in child path then go to next one
+                parent_pos += 1
+                continue
+            else:
+                # Otherwise add it to child path and go to next
+                child.set_stop(child_pos, parent_city)
+                child_pos += 1
+                parent_pos += 1
+
+        # Add return to 0 if last stop is empty
+        if child.get_stop(-1) == -1:
+            child.set_stop(-1, 0)
+
+        child.distance = self.tsp.path_dist(child)
+        return child
 
     def _breeding(self):
         # TODO: Implement
