@@ -11,12 +11,11 @@ class GreedySolver(Solver):
     def solve(self):
         # Path will always start and end in 0
         path = Path(self.tsp.dimension + 1)
-        path.set_stop(0, 0)
-        path.set_stop(-1, 0)
+        path[0] = path[-1] = 0
 
         # For each stop except the first and last one
-        for i in range(1, path.length - 1):
-            prev = path.get_stop(i - 1)
+        for i in range(1, len(path) - 1):
+            prev = path[i - 1]
             min_dist = inf
 
             # Check all connections to different cities
@@ -29,7 +28,7 @@ class GreedySolver(Solver):
                 new_dist = self.tsp.dist(prev, j)
                 if new_dist < min_dist:
                     min_dist = new_dist
-                    path.set_stop(i, j)
+                    path[i] = j
 
         path.distance = self.tsp.path_dist(path)
         return path

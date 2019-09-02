@@ -26,14 +26,14 @@ class DPSolver(Solver):
         # Retrace path of the recursion using predecessors array
         city, visited, i = 0, 1, 0
         while True:
-            res_path.set_stop(i, city)
+            res_path[i] = city
             city = self.pred[city][visited]
             if city == -1:
                 break
             visited = visited | (1 << city)
             i = i + 1
 
-        res_path.set_stop(i + 1, 0)
+        res_path[i + 1] = 0
         return res_path
 
     def _held_karp(self, city, visited):

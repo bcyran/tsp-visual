@@ -34,7 +34,7 @@ class GASolver(Solver):
         self._population.clear()
         for _ in range(self.population_size):
             path = Path(self.tsp.dimension + 1)
-            path.set_path(list(range(self.tsp.dimension)) + [0])
+            path.path = list(range(self.tsp.dimension)) + [0]
             path.shuffle(1, -1)
             path.distance = self.tsp.path_dist(path)
             self._population.append(path)
@@ -81,15 +81,12 @@ class GASolver(Solver):
         """
 
         # Initial child path
-        child = Path(self.tsp.dimension + 1)
+        child = Path(len(parent1))
 
         # Copy random subpath from parent 1 to child
         start, end = self._rand_subpath()
-        for i in range(start, end+1):
-            child.set_stop(i, parent1.get_stop(i))
-
-        # List of cities in subpath
-        subpath = child.get_path()[start:end+1]
+        subpath = parent1.path[start:end+1]
+        child[start:end+1] = subpath
 
         # Fill in rest of the cities from parent2 starting after the end
         # of copied subpath
@@ -97,14 +94,14 @@ class GASolver(Solver):
         while child_pos != start:
             # Look for city that is not in copied subpath, wrap search
             # to the beginning after reaching end
-            while parent2.get_stop(parent_pos) in subpath:
-                parent_pos = (parent_pos + 1) % parent1.length
+            while parent2[parent_pos] in subpath:
+                parent_pos = (parent_pos + 1) % len(parent1)
 
             # Set stop in child path
-            child.set_stop(child_pos, parent2.get_stop(parent_pos))
+            child[child_pos] = parent2[parent_pos]
             # Increment child position and wrap to the beginning if necessary
-            child_pos = (child_pos + 1) % parent1.length
-            parent_pos = (parent_pos + 1) % parent1.length
+            child_pos = (child_pos + 1) % len(parent1)
+            parent_pos = (parent_pos + 1) % len(parent1)
 
         child.distance = self.tsp.path_dist(child)
         return child
@@ -120,16 +117,14 @@ class GASolver(Solver):
         """
 
         # Starting path
-        child = Path(self.tsp.dimension + 1)
-
-        # Create mapping dict
-        mapping = {}
+        child = Path(len(parent1))
 
         # Copy random subpath from parent 1 to child and create mapping
         start, end = self._rand_subpath()
-        for i in range(start, end + 1):
-            child.set_stop(i, parent1.get_stop(i))
-            mapping[parent1.get_stop(i)] = parent2.get_stop(i)
+        child[start:end+1] = parent1[start:end+1]
+
+        # Create mapping
+        mapping = dict(zip(parent1[start:end+1], parent2[start:end+1]))
 
         # Copy stops from parent 2 to child using mapping if necessary
         child_pos = 0
@@ -140,14 +135,14 @@ class GASolver(Solver):
                 continue
 
             # Get city at current stop in parent 2
-            city = parent2.get_stop(child_pos)
+            city = parent2[child_pos]
 
             # Trace mapping if it exists
             while city in mapping:
                 city = mapping[city]
 
             # Set stop in the child path
-            child.set_stop(child_pos, city)
+            child[child_pos] = city
             child_pos += 1
 
         child.distance = self.tsp.path_dist(child)
@@ -168,8 +163,7 @@ class GASolver(Solver):
 
         # Copy random subpath from parent 1 to child
         start, end = self._rand_subpath()
-        for i in range(start, end+1):
-            child.set_stop(i, parent1.get_stop(i))
+        child[start:end+1] = parent1[start:end+1]
 
         # Fill in child's empty slots with cities from parent 2 in order
         parent_pos = child_pos = 0
@@ -180,20 +174,20 @@ class GASolver(Solver):
                 continue
 
             # Get city from parent path
-            parent_city = parent2.get_stop(parent_pos)
-            if child.in_path(parent_city):
+            city = parent2[parent_pos]
+
+            if child.in_path(city):
                 # If this city is already in child path then go to next one
                 parent_pos += 1
                 continue
             else:
                 # Otherwise add it to child path and go to next
-                child.set_stop(child_pos, parent_city)
+                child[child_pos] = city
                 child_pos += 1
                 parent_pos += 1
 
         # Add return to 0 if last stop is empty
-        if child.get_stop(-1) == -1:
-            child.set_stop(-1, 0)
+        child[-1] = child[-1] if child[-1] != -1 else 0
 
         child.distance = self.tsp.path_dist(child)
         return child

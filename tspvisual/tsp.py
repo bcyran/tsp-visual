@@ -74,7 +74,7 @@ class TSP:
         total = 0
 
         for i in range(path.length - 1):
-            total += self.dist(path.get_stop(i), path.get_stop(i + 1))
+            total += self.dist(path[i], path[i + 1])
 
         return total
 
@@ -85,9 +85,8 @@ class Path:
     Contains length of the path (number of visited cities), list of
     a consecutive city numbers and optionally path distance.
 
-    List of stops should be accessed only using `set_stop`, `get_stop`,
-    `set_path` and `get_path` methods to avoid incorrect path length due to
-    off-by-one errors.
+    Cities at specified stops can be accessed like in list since __setitem__
+    and __getitem__ are implemented.
     """
 
     # Available path neighbourhood types
@@ -98,26 +97,15 @@ class Path:
         self.length = length if path is None else len(path)
         self.distance = -1
 
-    def set_stop(self, index, city):
-        """Sets specified stop in the path to given city number.
-
-        :param int index: Index of the stop.
-        :param int city: City number.
+    @property
+    def path(self):
+        """Sequence of numbers representing consecutive cities visited in path.
         """
 
-        self._path[index] = city
+        return self._path
 
-    def get_stop(self, index):
-        """Returns city number in the specified stop.
-
-        :param int index: Index of the stop.
-        :return: City number.
-        :rtype: int
-        """
-
-        return self._path[index]
-
-    def set_path(self, path):
+    @path.setter
+    def path(self, path):
         """Sets the entire path to given sequence.
 
         :param list path: List of consecutive stops.
@@ -127,12 +115,6 @@ class Path:
             raise ValueError('Incorrect path length.')
 
         self._path = path
-
-    def get_path(self):
-        """Returns city number sequence.
-        """
-
-        return self._path
 
     def shuffle(self, i, j):
         """Shuffles specified slice of the path.
@@ -221,7 +203,28 @@ class Path:
 
         moves[neigh](i, j)
 
+    def __setitem__(self, stop, city):
+        """Sets specified stop in path to given city.
+        """
+
+        self._path[stop] = city
+
+    def __getitem__(self, stop):
+        """Returns city at a specified stop in path.
+        """
+
+        return self._path[stop]
+
+    def __len__(self):
+        """Returns path's length.
+        """
+
+        return self.length
+
     def __str__(self):
+        """Returns human-readable representation of the path.
+        """
+
         string = ''
         for stop in self._path:
             string += f'{stop}, '

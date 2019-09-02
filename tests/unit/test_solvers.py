@@ -71,4 +71,4 @@ class TestGASolver(TestCase):
                 parent1 = Path(path=p1)
                 parent2 = Path(path=p2)
                 child = fun(parent1, parent2)
-                self.assertListEqual(child.get_path(), exp)
+                self.assertListEqual(child.path, exp)

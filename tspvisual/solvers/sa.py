@@ -23,7 +23,7 @@ class SASolver(Solver):
     def solve(self):
         # Start with random path
         cur_path = Path(self.tsp.dimension + 1)
-        cur_path.set_path(list(range(cur_path.length - 1)) + [0])
+        cur_path.path = list(range(len(cur_path) - 1)) + [0]
         cur_path.shuffle(1, -1)
         cur_path.distance = self.tsp.path_dist(cur_path)
 

@@ -12,7 +12,7 @@ class BnBSolver(Solver):
     def solve(self):
         # Working path
         path = Path(self.tsp.dimension + 1)
-        path.set_stop(-1, 0)
+        path[-1] = 0
         # Minimal path and distance
         min_path, min_dist = Path(self.tsp.dimension + 1), inf
         # Nodes list (used as a stack)
@@ -26,7 +26,7 @@ class BnBSolver(Solver):
             cur_node = stack.pop()
             city, dist, level = cur_node
             # Update current path with this node
-            path.set_stop(level, city)
+            path[level] = city
             # This is the level of all children of this node
             next_level = level + 1
 

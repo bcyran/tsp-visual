@@ -10,8 +10,8 @@ class TestPath(unittest.TestCase):
     def test_init(self):
         for i in range(10):
             result = Path(i)
-            self.assertListEqual(result._path, [-1 for _ in range(i)])
-            self.assertEqual(result.length, i)
+            self.assertListEqual(result._path, [-1] * i)
+            self.assertEqual(len(result), i)
             self.assertEqual(result.distance, -1)
 
     def test_set_stop(self):
@@ -30,7 +30,7 @@ class TestPath(unittest.TestCase):
 
         for index, city, expected in data:
             with self.subTest(index=index, city=city):
-                path.set_stop(index, city)
+                path[index] = city
                 self.assertListEqual(path._path, expected)
 
     def test_set_stop_exception(self):
@@ -39,8 +39,9 @@ class TestPath(unittest.TestCase):
         path = Path(6)
 
         for index in data:
-            with self.subTest(index=index, length=path.length):
-                self.assertRaises(IndexError, path.set_stop, index, 0)
+            with self.subTest(index=index, length=len(path)):
+                with self.assertRaises(IndexError):
+                    path[index] = 0
 
     def test_get_stop(self):
         data = [2, 7, 4, 3, 5, 1]
@@ -49,7 +50,7 @@ class TestPath(unittest.TestCase):
 
         for index, value in enumerate(data):
             with self.subTest(index=index):
-                result = path.get_stop(index)
+                result = path[index]
                 self.assertEqual(result, value)
 
     def test_get_stop_exception(self):
@@ -58,8 +59,9 @@ class TestPath(unittest.TestCase):
         path = Path(6)
 
         for index in data:
-            with self.subTest(index=index, length=path.length):
-                self.assertRaises(IndexError, path.get_stop, index)
+            with self.subTest(index=index, length=len(path)):
+                with self.assertRaises(IndexError):
+                    path[index]
 
     def test_set_path(self):
         data = [
@@ -72,7 +74,7 @@ class TestPath(unittest.TestCase):
 
         for p in data:
             with self.subTest(path=p):
-                path.set_path(p)
+                path.path = p
                 self.assertListEqual(path._path, p)
 
     def test_set_path_exception(self):
@@ -87,7 +89,8 @@ class TestPath(unittest.TestCase):
 
         for p in data:
             with self.subTest(path=p):
-                self.assertRaises(ValueError, path.set_path, p)
+                with self.assertRaises(ValueError):
+                    path.path = p
 
     def test_get_path(self):
         data = [
@@ -101,7 +104,7 @@ class TestPath(unittest.TestCase):
         for p in data:
             with self.subTest(path=p):
                 path._path = p
-                result = path.get_path()
+                result = path.path
                 self.assertListEqual(result, p)
 
     def test_shuffle(self):
@@ -120,11 +123,11 @@ class TestPath(unittest.TestCase):
 
                 # Make sure no elements are lost or added
                 for n in p:
-                    self.assertEqual(path.get_path().count(n), p.count(n))
+                    self.assertEqual(path.path.count(n), p.count(n))
 
                 # Compare slices that shouldn't be shuffled
-                self.assertListEqual(path.get_path()[0:i], p[0:i])
-                self.assertListEqual(path.get_path()[j:-1], p[j:-1])
+                self.assertListEqual(path[0:i], p[0:i])
+                self.assertListEqual(path[j:-1], p[j:-1])
 
     def test_in_path(self):
         data = [
@@ -162,8 +165,7 @@ class TestPath(unittest.TestCase):
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
                 path.swap(i, j)
-                result = path.get_path()
-                self.assertListEqual(result, expected)
+                self.assertListEqual(path.path, expected)
 
     def test_insert(self):
         data = [
@@ -180,8 +182,7 @@ class TestPath(unittest.TestCase):
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
                 path.insert(i, j)
-                result = path.get_path()
-                self.assertListEqual(result, expected)
+                self.assertListEqual(path.path, expected)
 
     def test_invert(self):
         data = [
@@ -198,8 +199,7 @@ class TestPath(unittest.TestCase):
         for i, j, expected in data:
             with self.subTest(i=i, j=j):
                 path.invert(i, j)
-                result = path.get_path()
-                self.assertListEqual(result, expected)
+                self.assertListEqual(path.path, expected)
 
     def test_move(self):
         data = [
@@ -213,8 +213,7 @@ class TestPath(unittest.TestCase):
         for neigh, i, j, expected in data:
             with self.subTest(neigh=neigh, i=i, j=j):
                 path.move(neigh, i, j)
-                result = path.get_path()
-                self.assertListEqual(result, expected)
+                self.assertListEqual(path.path, expected)
 
 
 class TestTSP(unittest.TestCase):
@@ -266,7 +265,6 @@ class TestTSP(unittest.TestCase):
 
         for p, expected in data:
             with self.subTest(p=p):
-                path = Path(4)
-                path.set_path(p)
+                path = Path(path=p)
                 result = self.tsp.path_dist(path)
                 self.assertEqual(result, expected)
