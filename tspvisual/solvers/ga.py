@@ -88,29 +88,23 @@ class GASolver(Solver):
         for i in range(start, end+1):
             child.set_stop(i, parent1.get_stop(i))
 
-        # Fill in child's empty slots with cities from parent 2 in order
-        parent_pos = child_pos = 0
-        while parent_pos < self.tsp.dimension + 1:
-            # Skip already filled subpath
-            if start <= child_pos <= end:
-                child_pos = end + 1
-                continue
+        # List of cities in subpath
+        subpath = child.get_path()[start:end+1]
 
-            # Get city from parent path
-            parent_city = parent2.get_stop(parent_pos)
-            if child.in_path(parent_city):
-                # If this city is already in child path then go to next one
-                parent_pos += 1
-                continue
-            else:
-                # Otherwise add it to child path and go to next
-                child.set_stop(child_pos, parent_city)
-                child_pos += 1
-                parent_pos += 1
+        # Fill in rest of the cities from parent2 starting after the end
+        # of copied subpath
+        child_pos = parent_pos = end + 1
+        while child_pos != start:
+            # Look for city that is not in copied subpath, wrap search
+            # to the beginning after reaching end
+            while parent2.get_stop(parent_pos) in subpath:
+                parent_pos = (parent_pos + 1) % parent1.length
 
-        # Add return to 0 if last stop is empty
-        if child.get_stop(-1) == -1:
-            child.set_stop(-1, 0)
+            # Set stop in child path
+            child.set_stop(child_pos, parent2.get_stop(parent_pos))
+            # Increment child position and wrap to the beginning if necessary
+            child_pos = (child_pos + 1) % parent1.length
+            parent_pos = (parent_pos + 1) % parent1.length
 
         child.distance = self.tsp.path_dist(child)
         return child
