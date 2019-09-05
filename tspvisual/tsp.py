@@ -136,12 +136,7 @@ class Path:
         :rtype: bool
         """
 
-        limit = self.length if limit is None else limit
-        for stop in self._path[:limit]:
-            if stop == city:
-                return True
-
-        return False
+        return city in self._path[:limit]
 
     def swap(self, i, j):
         """Swaps cities at a specified path stops.

@@ -3,8 +3,6 @@ from copy import deepcopy
 from enum import Enum
 from random import randint, random
 
-import pandas as pd
-
 from tspvisual.solver import Solver
 from tspvisual.tsp import Path
 
@@ -87,11 +85,13 @@ class GASolver(Solver):
 
         self._mating_pool.clear()
 
-        # Create distances data frame, calculate cumulative sum and probability
-        df = pd.DataFrame(map(lambda p: p.distance, self._population),
-                          columns=['distance'])
-        df['cum_sum'] = df.distance.cumsum()
-        df['prob'] = df.cum_sum / df.distance.sum()
+        # Calculate population distances cumulative sums and pick probabilty
+        tot_sum = 0
+        cum_sums = []
+        for i in range(len(self._population)):
+            tot_sum += self._population[i].distance
+            cum_sums.append(tot_sum)
+        probs = [(cs / tot_sum) for cs in cum_sums]
 
         # For each free place in mating pool
         for _ in range(self.population_size - self.elite_size):
@@ -99,8 +99,8 @@ class GASolver(Solver):
             roulette = random()
 
             # Find first path with probability higher than roulette number
-            for i, row in df.iterrows():
-                if roulette <= row['prob']:
+            for i, prob in enumerate(probs):
+                if roulette <= prob:
                     self._mating_pool.append(self._population[i])
                     break
 
