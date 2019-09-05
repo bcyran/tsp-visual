@@ -1,3 +1,5 @@
+import time
+from copy import deepcopy
 from enum import Enum
 from random import randint, random
 
@@ -21,11 +23,48 @@ class GASolver(Solver):
         self.generations = 2000
         self.run_time = 0
         self.crossover_type = self.Crossover.NWOX
+        self.mutation_type = Path.Neighbourhood.INVERT
         self._population = []
         self._mating_pool = []
 
     def solve(self):
-        pass
+        # Init population and the best path
+        self._init_population()
+        min_path = self._population[0]
+
+        # End time
+        end_time = self._millis() + self.run_time
+
+        # Number of evolved generations
+        evolved = 0
+
+        # Repeat until end conditions are met
+        while True:
+            # Selection, breeding and mutation
+            self._selection()
+            self._breeding()
+            self._mutation()
+
+            # Sort the population
+            self._population.sort(key=lambda p: p.distance)
+
+            # If the best path in this generation is better than overall
+            # minimum set it as the current minimum
+            if self._population[0].distance < min_path.distance:
+                min_path = deepcopy(self._population[0])
+
+            # Increment generation counter
+            evolved += 1
+
+            # Terminate evolution after reaching generations limit
+            if not self.run_time and evolved >= self.generations:
+                break
+
+            # Terminate search after exceeding specified runtime
+            if self.run_time and self._millis() > end_time:
+                break
+
+        return min_path
 
     def _init_population(self):
         """Initializes population by creating specified number of random paths.
@@ -47,7 +86,6 @@ class GASolver(Solver):
         """
 
         self._mating_pool.clear()
-        self._mating_pool = self._population[:self.elite_size]
 
         # Create distances data frame, calculate cumulative sum and probability
         df = pd.DataFrame(map(lambda p: p.distance, self._population),
@@ -67,8 +105,21 @@ class GASolver(Solver):
                     break
 
     def _crossover(self, parent1, parent2):
-        # TODO: Implement
-        pass
+        """Performs currently selected crossover on two given paths.
+
+        :param Path parent1: First parent path.
+        :param Path parent2: Second parent path.
+        :return: Child path.
+        :rtype: Path
+        """
+
+        crossovers = {
+            self.Crossover.OX: self._crossover_ox,
+            self.Crossover.PMX: self._crossover_pmx,
+            self.Crossover.NWOX: self._crossover_nwox
+        }
+
+        return crossovers[self.crossover_type](parent1, parent2)
 
     def _crossover_ox(self, parent1, parent2):
         """Performs order crossover to create a child path from two given
@@ -193,12 +244,32 @@ class GASolver(Solver):
         return child
 
     def _breeding(self):
-        # TODO: Implement
-        pass
+        """Creates a new population by crossing over each individual in mating
+        pool with the next one in order.
+        """
+
+        # Clear population with retaining the elite
+        self._population = self._population[:self.elite_size]
+
+        # Crossover individuals with the next one
+        for i in range(self.population_size - self.elite_size - 1):
+            child = self._crossover(self._mating_pool[i],
+                                    self._mating_pool[i+1])
+            self._population.append(child)
+
+        # Wrap around and crossover last individual with the first one
+        child = self._crossover(self._mating_pool[-1], self._mating_pool[0])
+        self._population.append(child)
 
     def _mutation(self):
-        # TODO: Implement
-        pass
+        """Mutates population using currently set mutation rate
+        and mutation type.
+        """
+
+        for path in self._population[self.elite_size:]:
+            if random() >= self.mutation_rate:
+                i, j = self._rand_subpath()
+                path.move(self.mutation_type, i, j)
 
     def _rand_subpath(self):
         """Randomly chooses two stops in path creating random subpath.
@@ -213,3 +284,12 @@ class GASolver(Solver):
             j = randint(1, self.tsp.dimension - 1)
 
         return min(i, j), max(i, j)
+
+    def _millis(self):
+        """Returns current timestamp in milliseconds.
+
+        :return: Time since epoch in milliseconds.
+        :rtype: int
+        """
+
+        return int(round(time.time() * 1000))
