@@ -19,8 +19,6 @@ class Lines:
 
 class TSPLib:
     """Simple parser for TSPLIB files.
-
-    Supports instances with EDGE_WEIGHT_FORMAT: EXPLICIT and EUC_2D.
     """
 
     # Names of properties of integer type (all others are strings)
@@ -31,6 +29,7 @@ class TSPLib:
         self.specification = {}
         self.coords = []
         self.weights = None
+        self.display = []
 
         if file:
             self.load(file)
@@ -57,13 +56,16 @@ class TSPLib:
             try:
                 line = self._lines.current
                 if ':' in line:
-                    self._parse_spec()
+                    self.specification.update(self._parse_spec())
                 elif line.startswith('NODE_COORD_SECTION'):
                     next(self._lines)
-                    self._parse_coords()
+                    self.coords = self._parse_coords()
                 elif line.startswith('EDGE_WEIGHT_SECTION'):
                     next(self._lines)
-                    self._parse_weights()
+                    self.weights = self._parse_weights()
+                elif line.startswith('DISPLAY_DATA_SECTION'):
+                    next(self._lines)
+                    self.display = self._parse_coords()
                 else:
                     break
             except StopIteration:
@@ -72,29 +74,36 @@ class TSPLib:
         del self._lines
 
     def _parse_spec(self):
-        """Pases single line containing instance specification.
+        """Parses single line containing instance specification.
+
+        :return: Single parsed specification.
+        :rtype: dict
         """
 
         key, value = self._lines.current.split(':', 1)
         key, value = key.strip(), value.strip()
         value = int(value) if key in self._INT_PROPERTIES else value
-        self.specification[key] = value
 
         try:
             next(self._lines)
         except StopIteration:
             pass
 
+        return {key: value}
+
     def _parse_coords(self):
-        """Parses contents of NODE_COORD_SECTION.
+        """Parses contents of NODE_COORD_SECTION or DISPLAY_DATA_SECTION.
+
+        :return: Parsed coordinates.
+        :rtype: list
         """
 
-        self.coords = []
+        coords = []
 
         while True:
             try:
                 _, x, y = self._lines.current.split()
-                self.coords.append((float(x), float(y)))
+                coords.append((float(x), float(y)))
             except ValueError:
                 break
 
@@ -103,13 +112,18 @@ class TSPLib:
             except StopIteration:
                 break
 
+        return coords
+
     def _parse_weights(self):
         """Parses contents of EDGE_WEIGHT_SECTION.
+
+        :return: Parsed weights.
+        :rtype: list
         """
 
         # Initialize weights matrix
-        self.weights = [[-1 for _ in range(self.specification['DIMENSION'])]
-                        for _ in range(self.specification['DIMENSION'])]
+        weights = [[-1 for _ in range(self.specification['DIMENSION'])]
+                   for _ in range(self.specification['DIMENSION'])]
 
         # Cell coordinates iterator
         cells = self._cells()
@@ -119,14 +133,16 @@ class TSPLib:
                 try:
                     weight = int(value)
                     row, col = next(cells)
-                    self.weights[row][col] = weight
+                    weights[row][col] = weight
                 except (ValueError, StopIteration):
-                    return
+                    return weights
 
             try:
                 next(self._lines)
             except StopIteration:
                 break
+
+        return weights
 
     def _cells(self):
         """Generates consecutive matrix cells coordinates.

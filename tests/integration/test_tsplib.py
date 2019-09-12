@@ -42,6 +42,20 @@ class TestTSPLib(unittest.TestCase):
         self.tsplib.load('tests/fixtures/burma14.tsp')
         self.assertListEqual(self.tsplib.coords, expected)
 
+    def test_display(self):
+        expected = [
+            (1150, 1760), (630, 1660), (40, 2090), (750, 1100),
+            (750, 2030), (1030, 2070), (1650, 650), (1490, 1630),
+            (790, 2260), (710, 1310), (840, 550), (1170, 2300),
+            (970, 1340), (510, 700), (750, 900), (1280, 1200),
+            (230, 590), (460, 860), (1040, 950), (590, 1390),
+            (830, 1770), (490, 500), (1840, 1240), (1260, 1500),
+            (1280, 790), (490, 2130), (1460, 1420), (1260, 1910), (360, 1980)
+        ]
+
+        self.tsplib.load('tests/fixtures/bayg29.tsp')
+        self.assertListEqual(self.tsplib.display, expected)
+
     def test_weights(self):
         expected = [
             [0, -1, -1, -1, -1, -1],

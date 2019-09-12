@@ -67,12 +67,12 @@ class TestTSPLib(unittest.TestCase):
             ('DIMENSION    :    17', 'DIMENSION', 17)
         ]
 
-        for line, key, expected in data:
+        for line, key, value in data:
             with self.subTest(line=line):
-                self.tsplib.specification = {}
                 self.tsplib._lines = Lines([line])
-                self.tsplib._parse_spec()
-                self.assertEqual(self.tsplib.specification[key], expected)
+                result = self.tsplib._parse_spec()
+                expected = {key: value}
+                self.assertDictEqual(result, expected)
 
     def test_parse_coords(self):
         data = [
@@ -86,9 +86,9 @@ class TestTSPLib(unittest.TestCase):
         expected = [(1, 1), (2, 5), (4, 9), (5.3, 7), (9.7, 10.1)]
 
         self.tsplib._lines = Lines(data)
-        self.tsplib._parse_coords()
 
-        self.assertListEqual(list(self.tsplib.coords), expected)
+        result = self.tsplib._parse_coords()
+        self.assertListEqual(result, expected)
         self.assertEqual(self.tsplib._lines.current, data[-1])
 
     def test_parse_weights(self):
@@ -110,9 +110,9 @@ class TestTSPLib(unittest.TestCase):
             'EDGE_WEIGHT_FORMAT': 'FULL_MATRIX'
         }
         self.tsplib._lines = Lines(data)
-        self.tsplib._parse_weights()
 
-        self.assertListEqual(self.tsplib.weights, expected)
+        result = self.tsplib._parse_weights()
+        self.assertListEqual(result, expected)
         self.assertEqual(self.tsplib._lines.current, data[-1])
 
     def test_parse(self):
@@ -126,11 +126,15 @@ class TestTSPLib(unittest.TestCase):
             '1 1 1',
             '2 4 5',
             '3 4.20 69.9',
+            'DISPLAY_DATA_SECTION',
+            '1 2 3',
+            '2 12.5 67',
             'EOF'
         ]
         expected_spec = {'DIMENSION': 3, 'EDGE_WEIGHT_FORMAT': 'FULL_MATRIX'}
         expected_weigths = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         expected_coords = [(1, 1), (4, 5), (4.2, 69.9)]
+        expected_display = [(2, 3), (12.5, 67)]
 
         self.tsplib.specification = {}
         self.tsplib._lines = Lines(data)
@@ -139,6 +143,7 @@ class TestTSPLib(unittest.TestCase):
         self.assertDictEqual(self.tsplib.specification, expected_spec)
         self.assertListEqual(self.tsplib.weights, expected_weigths)
         self.assertListEqual(self.tsplib.coords, expected_coords)
+        self.assertListEqual(self.tsplib.display, expected_display)
 
     def test_nint(self):
         data = [
@@ -209,7 +214,3 @@ class TestTSPLib(unittest.TestCase):
                 self.tsplib.specification['EDGE_WEIGHT_TYPE'] = ewt
                 result = self.tsplib.weight(i, j)
                 self.assertEqual(result, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()
