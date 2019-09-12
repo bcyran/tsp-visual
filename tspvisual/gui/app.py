@@ -1,8 +1,10 @@
 import wx
 import wx.lib.inspection
 
-from tspvisual.gui.solver_controls import SolverControls
-from tspvisual.gui.tsp_view import TSPView
+from tspvisual.gui.solver_stats import SolverStats
+from tspvisual.gui.solver_view import SolverView
+from tspvisual.gui.tsp_info import TSPInfo
+from tspvisual.tsp import TSP
 
 
 class App(wx.Frame):
@@ -16,13 +18,21 @@ class App(wx.Frame):
         self.SetSize(1200, 900)
         self.Centre()
 
+        # Current TSP instance
+        self.tsp = None
+
     def init_ui(self):
         # Menubar
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
-        exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application')
+        open_mi = file_menu.Append(wx.ID_OPEN, 'Open', 'Open tsp instance')
+        file_menu.AppendSeparator()
         inspect_mi = file_menu.Append(wx.ID_ANY, 'Debug', 'Debug GUI')
+        exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application')
+        help_menu = wx.Menu()
+        about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program')
         menu_bar.Append(file_menu, 'File')
+        menu_bar.Append(help_menu, 'Help')
         self.SetMenuBar(menu_bar)
 
         # Main layout
@@ -30,18 +40,20 @@ class App(wx.Frame):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Title
-        title = wx.StaticText(panel, label='No instance loaded')
-        title_font = wx.Font(wx.FontInfo(18))
-        title.SetFont(title_font)
-        title.SetMinSize(title.GetTextExtent(title.Label))
-        sizer.Add(title, 0, wx.EXPAND | wx.ALL, 10)
+        self.title = wx.StaticText(panel, label='No instance loaded')
+        self.title_font = wx.Font(wx.FontInfo(18))
+        self.title.SetFont(self.title_font)
+        self.title.SetMinSize(self.title.GetTextExtent(self.title.Label))
+        sizer.Add(self.title, 0, wx.EXPAND | wx.ALL, 10)
 
         # Tabs
         notebook = wx.Notebook(panel)
-        main_tab = MainTab(notebook)
-        stats_tab = StatsTab(notebook)
-        notebook.AddPage(main_tab, 'Main')
-        notebook.AddPage(stats_tab, 'Stats')
+        self.solver_view = SolverView(notebook)
+        self.solver_stats = SolverStats(notebook)
+        self.tsp_info = TSPInfo(notebook)
+        notebook.AddPage(self.solver_view, 'Solver')
+        notebook.AddPage(self.solver_stats, 'Stats')
+        notebook.AddPage(self.tsp_info, 'Info')
         sizer.Add(notebook, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 
         panel.SetSizer(sizer)
@@ -49,44 +61,28 @@ class App(wx.Frame):
         self.Layout()
 
         # Event bindings
-        self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
+        self.Bind(wx.EVT_MENU, self.on_open, open_mi)
         self.Bind(wx.EVT_MENU, wx.lib.inspection.InspectionTool().Show,
                   inspect_mi)
+        self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
+        self.Bind(wx.EVT_MENU, self.on_about, about_mi)
 
+    def on_open(self, e):
+        """File opening handler.
+        """
 
-class MainTab(wx.Panel):
-    """Main tab of the app, solver controls and tsp view.
-    """
+        with (wx.FileDialog(self, 'Open tsp instance.',
+              wildcard='*.tsp',
+              style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)) as file_dialog:
 
-    def __init__(self, parent):
-        super(MainTab, self).__init__(parent)
-        self.init_ui()
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return
 
-    def init_ui(self):
-        # Background color
-        self.SetBackgroundColour('whitesmoke')
+            file = file_dialog.GetPath()
 
-        # Panel sizer
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
+            self.tsp = TSP(file)
+            self.title.SetLabel(f'Instance: {self.tsp.name}')
+            self.tsp_info.set_specification(self.tsp.specification)
 
-        # Solver controls and TSP view
-        controls = SolverControls(self)
-        tsp_view = TSPView(self)
-        sizer.Add(controls, 0, wx.EXPAND | wx.ALL, 10)
-        sizer.Add(tsp_view, 1, wx.EXPAND | wx.TOP | wx.RIGHT | wx.BOTTOM, 10)
-
-        self.SetSizer(sizer)
-        self.Layout()
-
-
-class StatsTab(wx.Panel):
-    """Second tab, graphs and statistics
-    """
-
-    def __init__(self, parent):
-        super(StatsTab, self).__init__(parent)
-        self.init_ui()
-
-    def init_ui(self):
-        # Background color
-        self.SetBackgroundColour('whitesmoke')
+    def on_about(self, e):
+        pass

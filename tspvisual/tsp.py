@@ -13,6 +13,7 @@ class TSP:
 
     def __init__(self, file=None):
         self._tsplib = None
+        self.specification = None
         self.name = None
         self.comment = None
         self.dimension = 0
@@ -35,6 +36,7 @@ class TSP:
             raise TypeError('Unsupported problem. Only TSP and ATSP instances '
                             'are supported.')
 
+        self.specification = self._tsplib.specification
         self.name = self._tsplib.specification['NAME']
         self.comment = self._tsplib.specification['COMMENT']
         self.dimension = self._tsplib.specification['DIMENSION']
@@ -66,13 +68,6 @@ class TSP:
 
         maximum = max(map(max, self.display))
         self.display = [(c[0] / maximum, c[1] / maximum) for c in self.display]
-
-    @property
-    def specification(self):
-        """Returns full specification of this instance.
-        """
-
-        return self._tsplib.specification
 
     def dist(self, i, j):
         """Returns the distance between two cities.
