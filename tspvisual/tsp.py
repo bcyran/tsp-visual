@@ -18,6 +18,7 @@ class TSP:
         self.dimension = 0
         self.coords = []
         self.distances = []
+        self.display = []
 
         if file is not None:
             self.load(file)
@@ -39,7 +40,14 @@ class TSP:
         self.dimension = self._tsplib.specification['DIMENSION']
         self.coords = self._tsplib.coords
 
+        self.display = (self._tsplib.display if self._tsplib.display
+                        else self.coords if self.coords else None)
+
         self._calc_distances()
+
+        if self.display:
+            self._norm_display()
+
         del self._tsplib
 
     def _calc_distances(self):
@@ -51,6 +59,20 @@ class TSP:
             for j in range(self.dimension):
                 row.append(self._tsplib.weight(i, j))
             self.distances.append(row)
+
+    def _norm_display(self):
+        """Normalizes display coordinates to values between 0 and 1.
+        """
+
+        maximum = max(map(max, self.display))
+        self.display = [(c[0] / maximum, c[1] / maximum) for c in self.display]
+
+    @property
+    def specification(self):
+        """Returns full specification of this instance.
+        """
+
+        return self._tsplib.specification
 
     def dist(self, i, j):
         """Returns the distance between two cities.

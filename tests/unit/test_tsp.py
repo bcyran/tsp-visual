@@ -237,6 +237,31 @@ class TestTSP(unittest.TestCase):
 
         self.assertListEqual(self.tsp.distances, self.distances)
 
+    def test_norm_display(self):
+        data = [
+            (1, 1),
+            (2, 5),
+            (4, 9),
+            (5, 7),
+            (9, 10),
+            (8, 3)
+        ]
+        expected = [
+            (0.1, 0.1),
+            (0.2, 0.5),
+            (0.4, 0.9),
+            (0.5, 0.7),
+            (0.9, 1),
+            (0.8, 0.3)
+        ]
+
+        self.tsp.display = data
+        self.tsp._norm_display()
+
+        for result, expected in zip(self.tsp.display, expected):
+            self.assertAlmostEqual(result[0], expected[0])
+            self.assertAlmostEqual(result[1], expected[1])
+
     def test_dist(self):
         data = [
             (1, 3, 8),
