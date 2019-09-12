@@ -7,12 +7,12 @@ from tspvisual.gui.tsp_info import TSPInfo
 from tspvisual.tsp import TSP
 
 
-class App(wx.Frame):
+class TSPVisual(wx.Frame):
     """Main app window wrapping around everything else.
     """
 
     def __init__(self):
-        super(App, self).__init__(None, title='TSP Visual')
+        super(TSPVisual, self).__init__(None, title='TSP Visual')
         self.init_ui()
         self.Show()
         self.SetSize(1200, 900)

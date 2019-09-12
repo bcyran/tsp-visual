@@ -1,11 +1,11 @@
 import wx
 
-from tspvisual.gui.app import App
+from tspvisual.gui.tspvisual import TSPVisual
 
 
 def main():
     app = wx.App()
-    App()
+    TSPVisual()
     app.MainLoop()
 
 
