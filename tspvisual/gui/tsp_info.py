@@ -23,10 +23,17 @@ class TSPInfo(wx.Panel):
         """Clears table and populates it with items from specification dict.
         """
 
-        self.table.DeleteAllItems()
+        self.reset()
 
         for key, value in specification.items():
             self.table.Append((key, value))
 
         self.table.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         self.table.SetColumnWidth(1, wx.LIST_AUTOSIZE)
+
+    def reset(self):
+        """Reset this panel to empty state.
+        """
+
+        self.specification = {}
+        self.table.DeleteAllItems()

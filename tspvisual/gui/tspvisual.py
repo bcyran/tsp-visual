@@ -1,6 +1,7 @@
 import wx
 import wx.lib.inspection
 
+from tspvisual.gui.helpers import borders
 from tspvisual.gui.solver_stats import SolverStats
 from tspvisual.gui.solver_view import SolverView
 from tspvisual.gui.tsp_info import TSPInfo
@@ -13,24 +14,27 @@ class TSPVisual(wx.Frame):
 
     def __init__(self):
         super(TSPVisual, self).__init__(None, title='TSP Visual')
+
+        # Currently opened TSP instance
+        self.tsp = None
+
+        # GUI
         self.init_ui()
         self.Show()
         self.SetSize(1200, 900)
         self.Centre()
 
-        # Current TSP instance
-        self.tsp = None
-
     def init_ui(self):
         # Menubar
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
-        open_mi = file_menu.Append(wx.ID_OPEN, 'Open', 'Open tsp instance')
+        open_mi = file_menu.Append(wx.ID_OPEN, 'Open', 'Open instance.')
+        close_mi = file_menu.Append(wx.ID_CLOSE, 'Close', 'Close instance.')
         file_menu.AppendSeparator()
-        inspect_mi = file_menu.Append(wx.ID_ANY, 'Debug', 'Debug GUI')
-        exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application')
+        inspect_mi = file_menu.Append(wx.ID_ANY, 'Debug', 'Debug GUI.')
+        exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application.')
         help_menu = wx.Menu()
-        about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program')
+        about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program.')
         menu_bar.Append(file_menu, 'File')
         menu_bar.Append(help_menu, 'Help')
         self.SetMenuBar(menu_bar)
@@ -54,7 +58,7 @@ class TSPVisual(wx.Frame):
         notebook.AddPage(self.solver_view, 'Solver')
         notebook.AddPage(self.solver_stats, 'Stats')
         notebook.AddPage(self.tsp_info, 'Info')
-        sizer.Add(notebook, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        sizer.Add(notebook, 1, wx.EXPAND | borders('lrb'), 10)
 
         panel.SetSizer(sizer)
         panel.Layout()
@@ -62,6 +66,7 @@ class TSPVisual(wx.Frame):
 
         # Event bindings
         self.Bind(wx.EVT_MENU, self.on_open, open_mi)
+        self.Bind(wx.EVT_MENU, self.on_close, close_mi)
         self.Bind(wx.EVT_MENU, wx.lib.inspection.InspectionTool().Show,
                   inspect_mi)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
@@ -83,6 +88,15 @@ class TSPVisual(wx.Frame):
             self.tsp = TSP(file)
             self.title.SetLabel(f'Instance: {self.tsp.name}')
             self.tsp_info.set_specification(self.tsp.specification)
+            self.solver_view.set_cities(self.tsp.display)
+
+    def on_close(self, e):
+        """File closing handler.
+        """
+
+        self.tsp = None
+        self.solver_view.reset()
+        self.tsp_info.reset()
 
     def on_about(self, e):
         pass
