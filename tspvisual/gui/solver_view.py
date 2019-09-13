@@ -138,17 +138,18 @@ class TSPView(wx.Panel):
         # Drawing area size
         w, h = self.GetClientSize()
         # Usable area
-        uw, uh = w - self.PADDING * 2, h - self.PADDING * 2
+        uw, uh = (w - self.PADDING * 2), (h - self.PADDING * 2)
         # Size of the drawing if it was scaled to fit the longer area side
-        vw, vh = uw / max_x, uh / max_y
+        vw, vh = (uw / max_x), (uh / max_y)
         # Shorter side
         side = min(vw, vh)
         # Effective padding
-        exp, eyp = (w - side * max_x) / 2, (h - side * max_y) / 2
+        exp, eyp = ((w - side * max_x) / 2), ((h - side * max_y) / 2)
 
         # Calculate for all points
         for c in self.cities:
-            x, y = c[0] * side + exp,  c[1] * side + eyp
+            # Note the inverted y axis
+            x, y = (c[0] * side + exp),  (h - (c[1] * side + eyp))
             self.points.append((x, y))
 
     def reset(self):
