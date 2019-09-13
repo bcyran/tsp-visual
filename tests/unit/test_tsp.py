@@ -230,7 +230,7 @@ class TestTSP(unittest.TestCase):
 
     @patch('tspvisual.tsp.TSPLib.weight')
     def test_calc_distances(self, mock_tsplib):
-        self.tsp.dimension = len(self.distances)
+        self.tsp.specification['DIMENSION'] = len(self.distances)
         mock_tsplib.side_effect = lambda i, j: self.distances[i][j]
 
         self.tsp._calc_distances()
@@ -247,20 +247,20 @@ class TestTSP(unittest.TestCase):
             (8, 3)
         ]
         expected = [
-            (0.1, 0.1),
-            (0.2, 0.5),
-            (0.4, 0.9),
-            (0.5, 0.7),
-            (0.9, 1),
-            (0.8, 0.3)
+            (0, 0),
+            (0.111, 0.444),
+            (0.333, 0.888),
+            (0.444, 0.666),
+            (0.888, 1),
+            (0.777, 0.222)
         ]
 
         self.tsp.display = data
         self.tsp._norm_display()
 
         for result, expected in zip(self.tsp.display, expected):
-            self.assertAlmostEqual(result[0], expected[0])
-            self.assertAlmostEqual(result[1], expected[1])
+            self.assertAlmostEqual(result[0], expected[0], 2)
+            self.assertAlmostEqual(result[1], expected[1], 2)
 
     def test_dist(self):
         data = [

@@ -67,7 +67,7 @@ class TestGASolver(TestCase):
         for (p1, p2, subpath), exp in zip(self.data, expected):
             with self.subTest(p1=p1, p2=p2, subpath=subpath):
                 mock_rand_subpath.return_value = subpath
-                self.gasolver.tsp.dimension = len(p1) - 1
+                self.gasolver.tsp.specification['DIMENSION'] = len(p1) - 1
                 parent1 = Path(path=p1)
                 parent2 = Path(path=p2)
                 child = fun(parent1, parent2)

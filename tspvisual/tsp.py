@@ -1,4 +1,5 @@
 from enum import Enum
+from operator import itemgetter
 from random import shuffle
 
 from tspvisual.tsplib import TSPLib
@@ -13,10 +14,7 @@ class TSP:
 
     def __init__(self, file=None):
         self._tsplib = None
-        self.specification = None
-        self.name = None
-        self.comment = None
-        self.dimension = 0
+        self.specification = {}
         self.coords = []
         self.distances = []
         self.display = []
@@ -37,11 +35,7 @@ class TSP:
                             'are supported.')
 
         self.specification = self._tsplib.specification
-        self.name = self._tsplib.specification['NAME']
-        self.comment = self._tsplib.specification['COMMENT']
-        self.dimension = self._tsplib.specification['DIMENSION']
         self.coords = self._tsplib.coords
-
         self.display = (self._tsplib.display if self._tsplib.display
                         else self.coords if self.coords else None)
 
@@ -51,6 +45,22 @@ class TSP:
             self._norm_display()
 
         del self._tsplib
+
+    @property
+    def name(self):
+        """Returns this instance' name from the specification.
+        """
+
+        return (self.specification['NAME'] if 'NAME' in self.specification
+                else None)
+
+    @property
+    def dimension(self):
+        """Returns this instance' dimension from the specification.
+        """
+
+        return (self.specification['DIMENSION'] if 'DIMENSION' in
+                self.specification else None)
 
     def _calc_distances(self):
         """Calculate distance matrix using TSPLib weight function.
@@ -63,9 +73,15 @@ class TSP:
             self.distances.append(row)
 
     def _norm_display(self):
-        """Normalizes display coordinates to values between 0 and 1.
+        """Translates and normalizes display coordinats for easier drawing.
         """
 
+        # Find lowest X and Y values
+        min_x = min(self.display, key=itemgetter(0))[0]
+        min_y = min(self.display, key=itemgetter(1))[1]
+        # Translate points to the (0, 0)
+        self.display = [(c[0] - min_x, c[1] - min_y) for c in self.display]
+        # Find maximum and normalize to [0, 1] values
         maximum = max(map(max, self.display))
         self.display = [(c[0] / maximum, c[1] / maximum) for c in self.display]
 
