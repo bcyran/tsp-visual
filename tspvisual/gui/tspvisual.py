@@ -12,6 +12,8 @@ class TSPVisual(wx.Frame):
     """Main app window wrapping around everything else.
     """
 
+    DEFAULT_TITLE = 'No instance loaded'
+
     def __init__(self):
         super(TSPVisual, self).__init__(None, title='TSP Visual')
 
@@ -47,7 +49,7 @@ class TSPVisual(wx.Frame):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Title
-        self.title = wx.StaticText(panel, label='No instance loaded')
+        self.title = wx.StaticText(panel, label=self.DEFAULT_TITLE)
         self.title_font = wx.Font(wx.FontInfo(18))
         self.title.SetFont(self.title_font)
         self.title.SetMinSize(self.title.GetTextExtent(self.title.Label))
@@ -79,6 +81,7 @@ class TSPVisual(wx.Frame):
         """Handles file opening.
         """
 
+        # Present file picker and try to load selected instance
         with (wx.FileDialog(self, 'Open tsp instance.',
               wildcard='*.tsp',
               style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)) as file_dialog:
@@ -88,16 +91,30 @@ class TSPVisual(wx.Frame):
 
             file = file_dialog.GetPath()
 
-            self.tsp = TSP(file)
-            self.title.SetLabel(f'Instance: {self.tsp.name}')
-            self.tsp_info.set_specification(self.tsp.specification)
+            try:
+                self.tsp = TSP(file)
+            except Exception as e:
+                wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
+                return
+
+        # Set title and specification of the open instance
+        self.title.SetLabel(f'Instance: {self.tsp.name}')
+        self.tsp_info.set_specification(self.tsp.specification)
+
+        # Set display data if instance contains it
+        if self.tsp.display:
             self.solver_view.set_cities(self.tsp.display)
+        else:
+            self.solver_view.reset()
+            wx.MessageBox('This instance does not have display data',
+                          'Warning', wx.OK | wx.ICON_WARNING)
 
     def _on_close(self, event):
         """Handles file closing.
         """
 
         self.tsp = None
+        self.title.SetLabel(self.DEFAULT_TITLE)
         self.solver_view.reset()
         self.tsp_info.reset()
 
