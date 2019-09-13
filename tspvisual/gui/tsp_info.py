@@ -7,11 +7,15 @@ class TSPInfo(wx.Panel):
 
     def __init__(self, parent):
         super(TSPInfo, self).__init__(parent)
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Builds GUI.
+        """
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        # Specification table
         self.table = wx.ListCtrl(self, style=wx.LC_REPORT)
         self.table.InsertColumn(0, 'Key')
         self.table.InsertColumn(1, 'Value')
@@ -20,7 +24,7 @@ class TSPInfo(wx.Panel):
         self.SetSizer(sizer)
 
     def set_specification(self, specification):
-        """Clears table and populates it with items from specification dict.
+        """Populates table with given specification.
         """
 
         self.reset()
@@ -32,7 +36,7 @@ class TSPInfo(wx.Panel):
         self.table.SetColumnWidth(1, wx.LIST_AUTOSIZE)
 
     def reset(self):
-        """Reset this panel to empty state.
+        """Resets this panel to empty state.
         """
 
         self.specification = {}

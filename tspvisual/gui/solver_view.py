@@ -11,9 +11,12 @@ class SolverView(wx.Panel):
 
     def __init__(self, parent):
         super(SolverView, self).__init__(parent)
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Builds GUI.
+        """
+
         # Panel sizer
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -26,9 +29,18 @@ class SolverView(wx.Panel):
         self.SetSizer(sizer)
 
     def set_cities(self, cities):
+        """Sets city list to display in TSPView.
+
+        :param list cities: List of the cities coordiantes to display in
+            normalized form (in [0, 1] range).
+        """
+
         self.tsp_view.set_cities(cities)
 
     def reset(self):
+        """Resets this control to its initial empty state.
+        """
+
         self.tsp_view.reset()
 
 
@@ -38,9 +50,12 @@ class SolverControls(wx.Panel):
 
     def __init__(self, parent):
         super(SolverControls, self).__init__(parent)
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Builds GUI.
+        """
+
         pass
 
 
@@ -59,18 +74,21 @@ class TSPView(wx.Panel):
         self.points = []
 
         # GUI
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Builds GUI.
+        """
+
         # Background style
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
 
         # Event bindings
-        self.Bind(wx.EVT_PAINT, self.paint)
-        self.Bind(wx.EVT_SIZE, self.on_resize)
+        self.Bind(wx.EVT_PAINT, self._on_paint)
+        self.Bind(wx.EVT_SIZE, self._on_resize)
 
-    def paint(self, event):
-        """Paints TSP instance.
+    def _on_paint(self, event):
+        """Paints currently set cities and paths.
         """
 
         # Create and clear drawing context
@@ -89,15 +107,14 @@ class TSPView(wx.Panel):
         for c in self.points:
             dc.DrawCircle(c[0], c[1], self.CITY_RADIUS)
 
-    def on_resize(self, event):
-        """Resize event handler.
+    def _on_resize(self, event):
+        """Handles resize event.
         """
 
         self.calculate_points()
 
     def set_cities(self, cities):
-        """Sets cities list, calculates difference between min and max values
-        among both x's and y's, repaints the control.
+        """Sets cities list, triggers point calculation and repaint.
         """
 
         self.cities = cities
@@ -135,7 +152,7 @@ class TSPView(wx.Panel):
             self.points.append((x, y))
 
     def reset(self):
-        """Resets control to its initial empty state.
+        """Resets this control to its initial empty state.
         """
 
         self.cities = []

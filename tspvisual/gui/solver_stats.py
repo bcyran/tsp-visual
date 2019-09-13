@@ -7,7 +7,10 @@ class SolverStats(wx.Panel):
 
     def __init__(self, parent):
         super(SolverStats, self).__init__(parent)
-        self.init_ui()
+        self._init_ui()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Build GUI.
+        """
+
         pass

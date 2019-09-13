@@ -19,12 +19,15 @@ class TSPVisual(wx.Frame):
         self.tsp = None
 
         # GUI
-        self.init_ui()
+        self._init_ui()
         self.Show()
         self.SetSize(1200, 900)
         self.Centre()
 
-    def init_ui(self):
+    def _init_ui(self):
+        """Builds GUI.
+        """
+
         # Menubar
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
@@ -65,15 +68,15 @@ class TSPVisual(wx.Frame):
         self.Layout()
 
         # Event bindings
-        self.Bind(wx.EVT_MENU, self.on_open, open_mi)
-        self.Bind(wx.EVT_MENU, self.on_close, close_mi)
+        self.Bind(wx.EVT_MENU, self._on_open, open_mi)
+        self.Bind(wx.EVT_MENU, self._on_close, close_mi)
         self.Bind(wx.EVT_MENU, wx.lib.inspection.InspectionTool().Show,
                   inspect_mi)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
-        self.Bind(wx.EVT_MENU, self.on_about, about_mi)
+        self.Bind(wx.EVT_MENU, self._on_about, about_mi)
 
-    def on_open(self, e):
-        """File opening handler.
+    def _on_open(self, event):
+        """Handles file opening.
         """
 
         with (wx.FileDialog(self, 'Open tsp instance.',
@@ -90,13 +93,16 @@ class TSPVisual(wx.Frame):
             self.tsp_info.set_specification(self.tsp.specification)
             self.solver_view.set_cities(self.tsp.display)
 
-    def on_close(self, e):
-        """File closing handler.
+    def _on_close(self, event):
+        """Handles file closing.
         """
 
         self.tsp = None
         self.solver_view.reset()
         self.tsp_info.reset()
 
-    def on_about(self, e):
+    def _on_about(self, event):
+        """Handles 'about' menu item.
+        """
+
         pass
