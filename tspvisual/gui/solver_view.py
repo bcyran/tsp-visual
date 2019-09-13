@@ -95,13 +95,18 @@ class TSPView(wx.Panel):
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
 
+        # Draw border
+        w, h = self.GetClientSize()
+        dc.SetPen(wx.Pen('lightgray'))
+        dc.DrawRectangle(0, 0, w, h)
+
         # Skip if there are no points
         if not self.points:
             return
 
         # Define pen and brush
-        dc.SetPen(wx.Pen('BLACK'))
-        dc.SetBrush(wx.Brush('BLACK'))
+        dc.SetPen(wx.Pen('black'))
+        dc.SetBrush(wx.Brush('black'))
 
         # Draw cities
         for c in self.points:
