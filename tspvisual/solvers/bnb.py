@@ -9,6 +9,9 @@ class BnBSolver(Solver):
     """Branch-and-bound solver for TSP
     """
 
+    name = 'Branch and Bound'
+    properties = []
+
     def solve(self):
         # Working path
         path = Path(self.tsp.dimension + 1)

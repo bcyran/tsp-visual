@@ -9,6 +9,9 @@ class DPSolver(Solver):
     """Dynamic programming (Held-Karp algorithm) solver for TSP.
     """
 
+    name = 'Dynamic Programming'
+    properties = []
+
     def __init__(self, tsp):
         super(DPSolver, self).__init__(tsp)
         self.sp_num = 1 << self.tsp.dimension

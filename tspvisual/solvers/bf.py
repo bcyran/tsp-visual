@@ -9,6 +9,9 @@ class BFSolver(Solver):
     """Brute force solver for TSP.
     """
 
+    name = 'Brute Force'
+    properties = []
+
     def solve(self):
         # Create starting path: 0, 1, 2, ..., 0, this path will be permuted
         path = Path(self.tsp.dimension + 1)

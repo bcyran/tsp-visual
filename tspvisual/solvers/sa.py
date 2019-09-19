@@ -3,13 +3,24 @@ from copy import deepcopy
 from math import exp
 from random import randint, random
 
-from tspvisual.solver import Solver
+from tspvisual.solver import Property, Solver
 from tspvisual.tsp import Path
 
 
 class SASolver(Solver):
     """Simulated annealing solver for TSP.
     """
+
+    name = 'Simulated Annealing'
+    properties = [
+        Property('Initial temperature', 'init_temp', float, 100),
+        Property('End temperature', 'end_temp', float, 0.1),
+        Property('Cooling rate', 'cooling_rate', float, 0.01),
+        Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
+                 Path.Neighbourhood.INVERT),
+        Property('Iterations', 'iterations', int, 450),
+        Property('Run time', 'run_time', int, 0)
+    ]
 
     def __init__(self, tsp):
         super(SASolver, self).__init__(tsp)

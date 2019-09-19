@@ -8,6 +8,9 @@ class GreedySolver(Solver):
     """Greedy solver for TSP.
     """
 
+    name = 'Greedy'
+    properties = []
+
     def solve(self):
         # Path will always start and end in 0
         path = Path(self.tsp.dimension + 1)

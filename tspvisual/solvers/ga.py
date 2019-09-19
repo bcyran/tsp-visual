@@ -3,7 +3,7 @@ from copy import deepcopy
 from enum import Enum
 from random import randint, random
 
-from tspvisual.solver import Solver
+from tspvisual.solver import Property, Solver
 from tspvisual.tsp import Path
 
 
@@ -12,6 +12,19 @@ class GASolver(Solver):
     """
 
     Crossover = Enum('Crossover', 'OX PMX NWOX')
+
+    name = 'Genetic Algorithm'
+    properties = [
+        Property('Population size', 'population_size', int, 80),
+        Property('Elite size', 'elite_size', int, 30),
+        Property('Mutation rate', 'mutation_rate', float, 0.05),
+        Property('Generations', 'generations', int, 2000),
+        Property('Run time [ms]', 'run_time', int, 0),
+        Property('Crossover type', 'crossover_type', Crossover,
+                 Crossover.NWOX),
+        Property('Mutation type', 'mutation_type', Path.Neighbourhood,
+                 Path.Neighbourhood.INVERT)
+    ]
 
     def __init__(self, tsp):
         super(GASolver, self).__init__(tsp)

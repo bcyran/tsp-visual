@@ -3,7 +3,7 @@ from copy import deepcopy
 from itertools import product
 from math import inf
 
-from tspvisual.solver import Solver
+from tspvisual.solver import Property, Solver
 from tspvisual.solvers.greedy import GreedySolver
 from tspvisual.tsp import Path
 
@@ -11,6 +11,17 @@ from tspvisual.tsp import Path
 class TSSolver(Solver):
     """Tabu Search solver for TSP.
     """
+
+    name = "Tabu Search"
+    properties = [
+        Property('Iterations', 'iterations', int, 1000),
+        Property('Cadence', 'cadence', 'int', 18),
+        Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
+                 Path.Neighbourhood.INVERT),
+        Property('Reset threshold', 'reset_threshold', int, 45),
+        Property('Stop threshold', 'stop_threshold', int, 450),
+        Property('Run time', 'run_time', int, 0)
+    ]
 
     def __init__(self, tsp):
         super(TSSolver, self).__init__(tsp)
