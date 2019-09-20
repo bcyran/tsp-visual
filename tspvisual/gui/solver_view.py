@@ -126,6 +126,9 @@ class SolverControls(wx.Panel):
         pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
 
+        # Run solver selection event handler to create default solver
+        self._on_select(None)
+
     def _on_select(self, event):
         """Handles selecting solver from solvers combobox.
         """
