@@ -1,7 +1,7 @@
 from math import inf
 
 from tspvisual.solver import Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class GreedySolver(Solver):
@@ -11,7 +11,12 @@ class GreedySolver(Solver):
     name = 'Greedy'
     properties = []
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+
         # Path will always start and end in 0
         path = Path(self.tsp.dimension + 1)
         path[0] = path[-1] = 0

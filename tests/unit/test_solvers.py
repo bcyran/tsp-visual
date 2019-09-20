@@ -9,7 +9,8 @@ class TestGASolver(TestCase):
 
     def setUp(self):
         tsp = TSP()
-        self.gasolver = GASolver(tsp)
+        self.gasolver = GASolver()
+        self.gasolver.tsp = tsp
 
         self.data = [
             ([0, 4, 1, 2, 6, 12, 3, 7, 14, 9, 10, 11, 5, 13, 8],

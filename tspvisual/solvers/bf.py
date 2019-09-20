@@ -2,7 +2,7 @@ from copy import deepcopy
 from itertools import permutations
 
 from tspvisual.solver import Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class BFSolver(Solver):
@@ -12,7 +12,12 @@ class BFSolver(Solver):
     name = 'Brute Force'
     properties = []
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+
         # Create starting path: 0, 1, 2, ..., 0, this path will be permuted
         path = Path(self.tsp.dimension + 1)
         path.path = list(range(len(path) - 1)) + [0]

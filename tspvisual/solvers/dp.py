@@ -2,7 +2,7 @@ from copy import deepcopy
 from math import inf
 
 from tspvisual.solver import Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class DPSolver(Solver):
@@ -12,15 +12,23 @@ class DPSolver(Solver):
     name = 'Dynamic Programming'
     properties = []
 
-    def __init__(self, tsp):
-        super(DPSolver, self).__init__(tsp)
+    def _setup(self):
+        """Sets up instance-specific data structures.
+        """
+
         self.sp_num = 1 << self.tsp.dimension
         self.FULL_SET = self.sp_num - 1
         self.mem = [[-1 for _ in range(self.sp_num)]
                     for _ in range(self.tsp.dimension)]
         self.pred = deepcopy(self.mem)
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+        self._setup()
+
         # Result path
         res_path = Path(self.tsp.dimension + 1)
         # Run Held-Karp algorithm

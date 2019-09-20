@@ -5,14 +5,10 @@ Property = namedtuple('Property', 'name field type default')
 
 
 class Solver(abc.ABC):
-    """TSP solver base class. It stores current TSP instance and defines
-    abstract solve method
+    """TSP solver base class. Defines interface for getting solver name and
+    properties as well as solving TSP instances.
     """
 
-    def __init__(self, tsp=None):
-        self.tsp = tsp
-
-    @property
     @abc.abstractmethod
     def name(self):
         """Returns name of the solver.
@@ -35,9 +31,10 @@ class Solver(abc.ABC):
         raise NotImplementedError('Solvers must implement properties method.')
 
     @abc.abstractmethod
-    def solve(self):
-        """Solves current TSP instance.
+    def solve(self, tsp):
+        """Solves given TSP instance.
 
+        :param TSP tsp: TSP instance to solve.
         :return: Best found path.
         :rtype: Path
         """

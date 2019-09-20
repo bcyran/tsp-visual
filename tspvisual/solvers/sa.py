@@ -4,7 +4,7 @@ from math import exp
 from random import randint, random
 
 from tspvisual.solver import Property, Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class SASolver(Solver):
@@ -17,13 +17,12 @@ class SASolver(Solver):
         Property('End temperature', 'end_temp', float, 0.1),
         Property('Cooling rate', 'cooling_rate', float, 0.01),
         Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
-                 Path.Neighbourhood.INVERT),
+                 'INVERT'),
         Property('Iterations', 'iterations', int, 450),
         Property('Run time', 'run_time', int, 0)
     ]
 
-    def __init__(self, tsp):
-        super(SASolver, self).__init__(tsp)
+    def __init__(self):
         self.init_temp = 100
         self.end_temp = 0.1
         self.cooling_rate = 0.01
@@ -31,7 +30,12 @@ class SASolver(Solver):
         self.iterations = 450
         self.run_time = 0
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+
         # Start with random path
         cur_path = Path(self.tsp.dimension + 1)
         cur_path.path = list(range(len(cur_path) - 1)) + [0]

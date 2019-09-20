@@ -5,7 +5,7 @@ from math import inf
 
 from tspvisual.solver import Property, Solver
 from tspvisual.solvers.greedy import GreedySolver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class TSSolver(Solver):
@@ -15,26 +15,36 @@ class TSSolver(Solver):
     name = "Tabu Search"
     properties = [
         Property('Iterations', 'iterations', int, 1000),
-        Property('Cadence', 'cadence', 'int', 18),
+        Property('Cadence', 'cadence', int, 18),
         Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
-                 Path.Neighbourhood.INVERT),
+                 'INVERT'),
         Property('Reset threshold', 'reset_threshold', int, 45),
         Property('Stop threshold', 'stop_threshold', int, 450),
         Property('Run time', 'run_time', int, 0)
     ]
 
-    def __init__(self, tsp):
-        super(TSSolver, self).__init__(tsp)
+    def __init__(self):
         self.iterations = 1000
         self.cadence = 18
         self.neighbourhood = Path.Neighbourhood.INVERT
         self.reset_threshold = 45
         self.stop_threshold = 450
         self.run_time = 0
+
+    def _setup(self):
+        """Sets up instance-specific data structures.
+        """
+
         self._tabu = [[0 for _ in range(self.tsp.dimension)]
                       for _ in range(self.tsp.dimension)]
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+        self._setup()
+
         # Starting path from a greedy solver
         greedy_solver = GreedySolver(self.tsp)
         cur_path = greedy_solver.solve()

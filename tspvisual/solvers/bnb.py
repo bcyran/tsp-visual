@@ -2,7 +2,7 @@ from copy import deepcopy
 from math import inf
 
 from tspvisual.solver import Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class BnBSolver(Solver):
@@ -12,7 +12,12 @@ class BnBSolver(Solver):
     name = 'Branch and Bound'
     properties = []
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+
         # Working path
         path = Path(self.tsp.dimension + 1)
         path[-1] = 0

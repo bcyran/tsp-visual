@@ -4,7 +4,7 @@ from enum import Enum
 from random import randint, random
 
 from tspvisual.solver import Property, Solver
-from tspvisual.tsp import Path
+from tspvisual.tsp import TSP, Path
 
 
 class GASolver(Solver):
@@ -20,14 +20,12 @@ class GASolver(Solver):
         Property('Mutation rate', 'mutation_rate', float, 0.05),
         Property('Generations', 'generations', int, 2000),
         Property('Run time [ms]', 'run_time', int, 0),
-        Property('Crossover type', 'crossover_type', Crossover,
-                 Crossover.NWOX),
+        Property('Crossover type', 'crossover_type', Crossover, 'NWOX'),
         Property('Mutation type', 'mutation_type', Path.Neighbourhood,
-                 Path.Neighbourhood.INVERT)
+                 'INVERT')
     ]
 
-    def __init__(self, tsp):
-        super(GASolver, self).__init__(tsp)
+    def __init__(self):
         self.population_size = 80
         self.elite_size = 30
         self.mutation_rate = 0.05
@@ -38,7 +36,12 @@ class GASolver(Solver):
         self._population = []
         self._mating_pool = []
 
-    def solve(self):
+    def solve(self, tsp):
+        # Make sure given argument is of correct type
+        if not isinstance(tsp, TSP):
+            raise TypeError('solve() argument has to be of type \'TSP\'')
+        self.tsp = tsp
+
         # Init population and the best path
         self._init_population()
         min_path = self._population[0]
