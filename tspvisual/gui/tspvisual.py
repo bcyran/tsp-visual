@@ -1,6 +1,7 @@
 import wx
 import wx.adv
 import wx.lib.inspection
+from pubsub import pub
 
 from tspvisual.gui.helpers import borders
 from tspvisual.gui.solver_stats import SolverStats
@@ -17,9 +18,6 @@ class TSPVisual(wx.Frame):
 
     def __init__(self):
         super(TSPVisual, self).__init__(None, title='TSP Visual')
-
-        # Currently opened TSP instance
-        self.tsp = None
 
         # GUI
         self._init_ui()
@@ -77,6 +75,7 @@ class TSPVisual(wx.Frame):
                   debug_mi)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
         self.Bind(wx.EVT_MENU, self._on_about, about_mi)
+        pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
 
     def _on_open(self, event):
         """Handles file opening.
@@ -93,31 +92,25 @@ class TSPVisual(wx.Frame):
             file = file_dialog.GetPath()
 
             try:
-                self.tsp = TSP(file)
+                tsp = TSP(file)
+                pub.sendMessage('TSP_CHANGE', tsp=tsp)
             except Exception as e:
                 wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
-                return
-
-        # Set title and specification of the open instance
-        self.title.SetLabel(f'Instance: {self.tsp.name}')
-        self.tsp_info.set_specification(self.tsp.specification)
-
-        # Set display data if instance contains it
-        if self.tsp.display:
-            self.solver_view.set_cities(self.tsp.display)
-        else:
-            self.solver_view.reset()
-            wx.MessageBox('This instance does not have display data',
-                          'Warning', wx.OK | wx.ICON_WARNING)
 
     def _on_close(self, event):
         """Handles file closing.
         """
 
-        self.tsp = None
-        self.title.SetLabel(self.DEFAULT_TITLE)
-        self.solver_view.reset()
-        self.tsp_info.reset()
+        pub.sendMessage('TSP_CHANGE', tsp=None)
+
+    def _on_tsp_change(self, tsp):
+        """Handles TSP change event.
+        """
+
+        if not tsp:
+            self.title.SetLabel(self.DEFAULT_TITLE)
+        else:
+            self.title.SetLabel(f'Instance: {tsp.name}')
 
     def _on_about(self, event):
         """Shows about program box when.

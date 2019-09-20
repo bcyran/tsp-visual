@@ -1,4 +1,5 @@
 import wx
+from pubsub import pub
 
 
 class TSPInfo(wx.Panel):
@@ -23,13 +24,18 @@ class TSPInfo(wx.Panel):
 
         self.SetSizer(sizer)
 
-    def set_specification(self, specification):
+        pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
+
+    def _on_tsp_change(self, tsp):
         """Populates table with given specification.
         """
 
         self.reset()
 
-        for key, value in specification.items():
+        if not tsp:
+            return
+
+        for key, value in tsp.specification.items():
             self.table.Append((key, value))
 
         self.table.SetColumnWidth(0, wx.LIST_AUTOSIZE)

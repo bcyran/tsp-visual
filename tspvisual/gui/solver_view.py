@@ -1,7 +1,9 @@
+from enum import Enum
 from operator import itemgetter
 
 import wx
-import wx.lib.scrolledpanel
+import wx.propgrid as wxpg
+from pubsub import pub
 
 from tspvisual.gui.helpers import borders
 from tspvisual.solver import Solver
@@ -61,6 +63,10 @@ class SolverControls(wx.Panel):
         self.solvers = {s.name: s for s in Solver.__subclasses__()}
         self.solver_names = sorted(list(self.solvers.keys()))
 
+        # Currently selected solver and tsp
+        self.solver = None
+        self.tsp = None
+
         self._init_ui()
 
     def _init_ui(self):
@@ -111,11 +117,36 @@ class SolverControls(wx.Panel):
 
         # Properties box contents
         self.solver_properties = SolverProperties(self)
-        self.solver_properties.SetupScrolling()
-        self.solver_properties.set_solver(self.solvers['Tabu Search'])
         props_box_sizer.Add(self.solver_properties, 1, wx.EXPAND | wx.ALL, 10)
 
         self.SetSizer(sizer)
+
+        # Event bindings
+        self.solver_select.Bind(wx.EVT_CHOICE, self._on_select)
+        pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
+        pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
+
+    def _on_select(self, event):
+        """Handles selecting solver from solvers combobox.
+        """
+
+        solver_name = self.solver_names[self.solver_select.GetSelection()]
+        solver_class = self.solvers[solver_name]
+        solver = solver_class()
+
+        pub.sendMessage('SOLVER_CHANGE', solver=solver)
+
+    def _on_solver_change(self, solver):
+        """Handles solver change event.
+        """
+
+        self.solver = solver
+
+    def _on_tsp_change(self, tsp):
+        """Handles TSP change event.
+        """
+
+        self.tsp = tsp
 
 
 class TSPView(wx.Panel):
@@ -145,6 +176,7 @@ class TSPView(wx.Panel):
         # Event bindings
         self.Bind(wx.EVT_PAINT, self._on_paint)
         self.Bind(wx.EVT_SIZE, self._on_resize)
+        pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
 
     def _on_paint(self, event):
         """Paints currently set cities and paths.
@@ -171,6 +203,22 @@ class TSPView(wx.Panel):
         """
 
         self.calculate_points()
+
+    def _on_tsp_change(self, tsp):
+        """Handles TSP change event.
+        """
+
+        self.reset()
+
+        if not tsp:
+            return
+
+        if not tsp.display:
+            wx.MessageBox('This instance does not have display data',
+                          'Warning', wx.OK | wx.ICON_WARNING)
+            return
+
+        self.set_cities(tsp.display)
 
     def set_cities(self, cities):
         """Sets cities list, triggers point calculation and repaint.
@@ -220,29 +268,43 @@ class TSPView(wx.Panel):
         self.Refresh()
 
 
-class SolverProperties(wx.lib.scrolledpanel.ScrolledPanel):
+class SolverProperties(wx.propgrid.PropertyGrid):
     """Panel for configuring solver-specific options.
     """
 
     def __init__(self, parent):
-        super(SolverProperties, self).__init__(parent)
+        super(SolverProperties, self).__init__(parent,
+                                               style=wxpg.PG_HIDE_MARGIN |
+                                               wxpg.PG_BOLD_MODIFIED |
+                                               wxpg.PG_TOOLTIPS)
 
-        # Currently set solver
+        # Currently selected solver
         self.solver = None
 
         self._init_ui()
 
     def _init_ui(self):
-        """Builds GUI basing on current set solver.
+        """Builds GUI.
         """
 
-        # Skip if there is no solver or solver has no properties
-        if not self.solver or not self.solver.properties:
-            return
+        # Event bindings
+        self.Bind(wxpg.EVT_PG_CHANGED, self._on_changed)
+        pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
 
-        sizer = wx.GridBagSizer(10, 10)
+    def _on_changed(self, event):
+        """Applies current properties values to the currently set solver.
+        """
 
-        self.SetSizer(sizer)
+        for prop in self.Properties:
+            solver_prop = prop.GetAttribute('solver_property')
+            value = solver_prop.type(prop.GetValue())
+            setattr(self.solver, solver_prop.field, value)
+
+    def _on_solver_change(self, solver):
+        """Handles solver change event.
+        """
+
+        self.set_solver(solver)
 
     def set_solver(self, solver):
         """Sets current solver and builds UI basing on its properties.
@@ -250,11 +312,45 @@ class SolverProperties(wx.lib.scrolledpanel.ScrolledPanel):
         :param Solver solver: Solver to show properties of.
         """
 
+        # Set the solver
         self.solver = solver
-        self._init_ui()
 
-    def apply_properties(self):
-        """Applies entered properties to the currently set solver.
+        # Reset the properties
+        self.reset()
+
+        # Skip if there is no solver or solver has no properties
+        if not self.solver or not self.solver.properties:
+            return
+
+        # For each property
+        for p in self.solver.properties:
+            # Create property object with appropriate type
+            if p.type is int:
+                prop = wxpg.IntProperty()
+            elif p.type is float:
+                prop = wxpg.FloatProperty()
+            elif issubclass(p.type, Enum):
+                prop = wxpg.EnumProperty()
+                labels = list(map(lambda c: c.name, p.type))
+                values = list(map(lambda c: c.value, p.type))
+                prop_choices = wxpg.PGChoices(labels=labels, values=values)
+                prop.SetChoices(prop_choices)
+
+            # Set label and value
+            prop.SetLabel(p.name)
+            prop.SetValue(p.default)
+            prop.SetDefaultValue(p.default)
+            prop.SetAttribute('solver_property', p)
+
+            # And append the property object
+            self.Append(prop)
+
+        # Fit columns and layout the parent
+        self.FitColumns()
+        self.GetParent().Layout()
+
+    def reset(self):
+        """Resets control to initial state.
         """
 
-        pass
+        self.Clear()
