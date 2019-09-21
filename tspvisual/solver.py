@@ -1,6 +1,9 @@
 import abc
 from collections import namedtuple
 
+SolverState = namedtuple('SolverState',
+                         'progress current best final highlight')
+
 Property = namedtuple('Property', 'name field type default')
 
 
@@ -9,6 +12,7 @@ class Solver(abc.ABC):
     properties as well as solving TSP instances.
     """
 
+    @property
     @abc.abstractmethod
     def name(self):
         """Returns name of the solver.
@@ -31,12 +35,29 @@ class Solver(abc.ABC):
         raise NotImplementedError('Solvers must implement properties method.')
 
     @abc.abstractmethod
-    def solve(self, tsp):
-        """Solves given TSP instance.
+    def solve(self, tsp, steps=True):
+        """Solves given instance and returns a generator of SolverState
+        objects. If `steps` argument is set to True solver state is generated
+        with each algorithm step, otherwise just the final one is
+        returned.
+
+        :param TSP tsp: TSP instance to solve.
+        :param bool full: Whether to retur all intermediate states.
+        :return: Generator of consecutive states.
+        :rtype: generator
+        """
+
+        raise NotImplementedError('Solvers must implement solve method.')
+
+    def result(self, tsp):
+        """Solves given instance and returns the result.
+
+        This function is just a wrapper around `solve` to avoid returning
+        a generator when the only thing needed is a result.
 
         :param TSP tsp: TSP instance to solve.
         :return: Best found path.
         :rtype: Path
         """
 
-        raise NotImplementedError('Solvers must implement solve method.')
+        return next(self.solve(tsp, steps=False)).best
