@@ -29,7 +29,7 @@ class BFSolver(Solver):
         perms = permutations(path.path[1:-1])
 
         if steps:
-            total = factorial(self.tsp.dimension)
+            total = factorial(self.tsp.dimension - 1)
 
         # Loop through all permutations to find the shortest path
         for i, perm in enumerate(perms):
@@ -40,6 +40,9 @@ class BFSolver(Solver):
                 min_path = deepcopy(path)
 
             if steps:
-                yield SolverState(i / total, path, min_path, False, None)
+                # Need to use deepcopies because object could change before the
+                # reference will be used
+                yield SolverState(i / total * 100, deepcopy(path),
+                                  deepcopy(min_path), False, None)
 
-        yield SolverState(1, None, min_path, True, None)
+        yield SolverState(100, None, min_path, True, None)
