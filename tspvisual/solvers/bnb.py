@@ -1,7 +1,7 @@
 from copy import deepcopy
-from math import inf
+from math import factorial, inf
 
-from tspvisual.solver import Solver
+from tspvisual.solver import Solver, SolverState
 from tspvisual.tsp import TSP, Path
 
 
@@ -12,17 +12,23 @@ class BnBSolver(Solver):
     name = 'Branch and Bound'
     properties = []
 
-    def solve(self, tsp):
+    def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
             raise TypeError('solve() argument has to be of type \'TSP\'')
         self.tsp = tsp
 
+        # Total and current number of steps for calculating progress
+        if steps:
+            total = factorial(self.tsp.dimension - 1) * 2
+            current = 0
+
         # Working path
         path = Path(self.tsp.dimension + 1)
         path[-1] = 0
         # Minimal path and distance
-        min_path, min_dist = Path(self.tsp.dimension + 1), inf
+        min_path = Path(self.tsp.dimension + 1)
+        min_path.distance = inf
         # Nodes list (used as a stack)
         stack = []
 
@@ -30,6 +36,10 @@ class BnBSolver(Solver):
         stack.append((0, 0, 0))
 
         while len(stack) > 0:
+            # Increment step counter
+            if steps:
+                current += 1
+
             # Get node from the top of the stack
             cur_node = stack.pop()
             city, dist, level = cur_node
@@ -40,11 +50,16 @@ class BnBSolver(Solver):
 
             # If it's the last level of the tree
             if level == self.tsp.dimension - 1:
+                # Yield the current state
+                if steps:
+                    yield SolverState(current / total * 100, deepcopy(path),
+                                      deepcopy(min_path), False, None)
                 # Distance of full path with return to 0
                 new_dist = dist + self.tsp.dist(city, 0)
                 # Keep it if it's better than the current minimum
-                if new_dist < min_dist:
-                    min_path, min_dist = deepcopy(path), new_dist
+                if new_dist < min_path.distance:
+                    min_path = deepcopy(path)
+                    min_path.distance = new_dist
                 else:
                     continue
 
@@ -56,11 +71,10 @@ class BnBSolver(Solver):
 
                 # Skip this node if its distance is greater than min path
                 next_dist = dist + self.tsp.dist(city, i)
-                if next_dist >= min_dist:
+                if next_dist >= min_path.distance:
                     continue
 
                 # If it's valid node push it onto stack
                 stack.append((i, next_dist, next_level))
 
-        min_path.distance = self.tsp.path_dist(min_path)
-        return min_path
+        yield SolverState(100, None, deepcopy(min_path), True, None)
