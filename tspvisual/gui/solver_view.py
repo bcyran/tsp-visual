@@ -85,31 +85,42 @@ class SolverControls(wx.Panel):
 
         # Solver box contents
         solver_sizer = wx.GridBagSizer(10, 10)
+
+        # Solver selection
+        solver_select_label = wx.StaticText(solver_box,
+                                            label='Solver selection')
+        solver_sizer.Add(solver_select_label, (0, 0), (1, 2),
+                         wx.EXPAND | borders('trl'), 10)
         self.solver_select = wx.Choice(solver_box, choices=self.solver_names)
         self.solver_select.SetSelection(0)
-        solver_sizer.Add(self.solver_select, (0, 0), (1, 2),
-                         wx.EXPAND | borders('trl'), 10)
-        self.solve_button = wx.Button(solver_box,
-                                      label=self.SOLVE_BTN_INACTIVE)
-        solver_sizer.Add(self.solve_button, (1, 0), (1, 1),
-                         wx.EXPAND | borders('l'), 10)
-        self.reset_button = wx.Button(solver_box, label='Reset')
-        solver_sizer.Add(self.reset_button, (1, 1), (1, 1),
-                         wx.EXPAND | borders('r'), 10)
+        solver_sizer.Add(self.solver_select, (1, 0), (1, 2),
+                         wx.EXPAND | borders('rl'), 10)
+        # Delay setting
         delay_label = wx.StaticText(solver_box, label='Delay [ms]')
         solver_sizer.Add(delay_label, (2, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
         self.delay = wx.Slider(solver_box, value=0, minValue=0, maxValue=1000,
                                style=wx.SL_LABELS)
-        # TODO: Update SolverRunner delay dynamically
         solver_sizer.Add(self.delay, (3, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
-        progress_label = wx.StaticText(solver_box, label='Progress')
-        solver_sizer.Add(progress_label, (4, 0), (1, 2),
+        # Show best path checkbox
+        self.show_best = wx.CheckBox(solver_box, label='Show the best path')
+        self.show_best.SetValue(True)
+        solver_sizer.Add(self.show_best, (4, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
+        # Solve button
+        self.solve_button = wx.Button(solver_box,
+                                      label=self.SOLVE_BTN_INACTIVE)
+        solver_sizer.Add(self.solve_button, (5, 0), (1, 1),
+                         wx.EXPAND | borders('l'), 10)
+        # Reset button
+        self.reset_button = wx.Button(solver_box, label='Reset')
+        solver_sizer.Add(self.reset_button, (5, 1), (1, 1),
+                         wx.EXPAND | borders('r'), 10)
+        # Progress bar
         self.progress = wx.Gauge(solver_box, range=100)
-        self.progress.SetMaxSize((-1, 10))
-        solver_sizer.Add(self.progress, (5, 0), (1, 2),
+        # self.progress.SetMaxSize((-1, 10))
+        solver_sizer.Add(self.progress, (6, 0), (1, 2),
                          wx.EXPAND | borders('rbl'), 10)
         solver_box_sizer.Add(solver_sizer)
 
@@ -135,6 +146,8 @@ class SolverControls(wx.Panel):
         self.solver_select.Bind(wx.EVT_CHOICE, self._on_select)
         self.solve_button.Bind(wx.EVT_BUTTON, self._on_solve)
         self.reset_button.Bind(wx.EVT_BUTTON, self._on_reset)
+        self.delay.Bind(wx.EVT_SCROLL_CHANGED, self._on_delay_set)
+        self.show_best.Bind(wx.EVT_CHECKBOX, self._on_show_best)
         pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_change, 'SOLVER_STATE_CHANGE')
@@ -153,7 +166,7 @@ class SolverControls(wx.Panel):
         pub.sendMessage('SOLVER_CHANGE', solver=solver)
 
     def _on_solve(self, event):
-        """Handles clicking `solve` button - runs `SolverRunner` with currently
+        """Handles clicking 'solve' button - runs `SolverRunner` with currently
         set solver and tsp.
         """
 
@@ -181,12 +194,30 @@ class SolverControls(wx.Panel):
             self._set_running(False)
 
     def _on_reset(self, event):
-        """Handles clicking `reset` button - clears displayed result.
+        """Handles clicking 'reset' button - clears displayed result.
         """
 
         self.result.SetLabel(self.DEFAULT_RESULT)
         self.progress.SetValue(0)
-        # TODO: Clean TSPView current state
+        pub.sendMessage('SOLVER_STATE_CHANGE', state=None)
+
+    def _on_delay_set(self, event):
+        """Handles setting 'delay' slider - if there is an active runner its
+        delay to the value from slider.
+        """
+
+        if not self.running:
+            return
+
+        self.runner.delay = self.delay.GetValue() / 1000
+
+    def _on_show_best(self, event):
+        """Handles checking or unchecking 'show best path' checkbox - sends
+        `VIEW_OPTION_CHANGE` pubsub message.
+        """
+
+        pub.sendMessage('VIEW_OPTION_CHANGE',
+                        show_best=self.show_best.GetValue())
 
     def _on_solver_change(self, solver):
         """Handles solver change event.
@@ -206,6 +237,9 @@ class SolverControls(wx.Panel):
 
         :param SolverState state: New solver state.
         """
+
+        if not state:
+            return
 
         result = state.best.distance
         self.result.SetLabel(str(result))
@@ -242,7 +276,7 @@ class TSPView(wx.Panel):
     CITY_RADIUS = 2
     CITY_COLOR = 'black'
     CURRENT_PATH_COLOR = 'black'
-    BEST_PATH_COLOR = 'yellow'
+    BEST_PATH_COLOR = 'red'
     HIGHLIGHT_PATH_COLOR = 'blue'
 
     def __init__(self, parent):
@@ -253,6 +287,8 @@ class TSPView(wx.Panel):
         self._points = []
         # Solver state
         self._state = None
+        # Whether to show the best path
+        self.show_best = True
 
         # GUI
         self._init_ui()
@@ -269,6 +305,7 @@ class TSPView(wx.Panel):
         self.Bind(wx.EVT_SIZE, self._on_resize)
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_change, 'SOLVER_STATE_CHANGE')
+        pub.subscribe(self._on_view_option_change, 'VIEW_OPTION_CHANGE')
 
     def _on_paint(self, event):
         """Paints currently set cities and paths.
@@ -295,7 +332,7 @@ class TSPView(wx.Panel):
             return
 
         # Draw paths
-        if self._state.best:
+        if self._state.best and (self.show_best or self._state.final):
             self._draw_path(dc, self._state.best, self.BEST_PATH_COLOR)
         if self._state.current:
             self._draw_path(dc, self._state.current, self.CURRENT_PATH_COLOR)
@@ -340,6 +377,13 @@ class TSPView(wx.Panel):
         """
 
         self.set_state(state)
+
+    def _on_view_option_change(self, show_best):
+        """Handles view option change - enables or disables displaying of the
+        best path.
+        """
+
+        self.show_best = show_best
 
     def set_cities(self, cities):
         """Sets cities list, triggers point calculation and repaint.
@@ -393,6 +437,7 @@ class TSPView(wx.Panel):
 
         self._cities = []
         self._points = []
+        self._state = None
         self.Refresh()
 
 
