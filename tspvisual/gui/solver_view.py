@@ -238,7 +238,7 @@ class SolverControls(wx.Panel):
         :param SolverState state: New solver state.
         """
 
-        if not state:
+        if not state or not state.best:
             return
 
         result = state.best.distance

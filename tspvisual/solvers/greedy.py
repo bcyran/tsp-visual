@@ -1,6 +1,7 @@
+from copy import deepcopy
 from math import inf
 
-from tspvisual.solver import Solver
+from tspvisual.solver import Solver, SolverState
 from tspvisual.tsp import TSP, Path
 
 
@@ -11,7 +12,7 @@ class GreedySolver(Solver):
     name = 'Greedy'
     properties = []
 
-    def solve(self, tsp):
+    def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
             raise TypeError('solve() argument has to be of type \'TSP\'')
@@ -38,5 +39,10 @@ class GreedySolver(Solver):
                     min_dist = new_dist
                     path[i] = j
 
+            if steps:
+                hihglight = Path(path=path[i-1:i+1])
+                yield SolverState(i / (len(path) - 1) * 100,
+                                  deepcopy(path), None, False, hihglight)
+
         path.distance = self.tsp.path_dist(path)
-        return path
+        yield SolverState(100, None, deepcopy(path), True, None)
