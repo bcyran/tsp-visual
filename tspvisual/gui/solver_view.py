@@ -108,19 +108,24 @@ class SolverControls(wx.Panel):
         self.show_best.SetValue(True)
         solver_sizer.Add(self.show_best, (4, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
+        # Show current path checkbox
+        self.show_current = wx.CheckBox(solver_box, label='Show current path')
+        self.show_current.SetValue(False)
+        solver_sizer.Add(self.show_current, (5, 0), (1, 2),
+                         wx.EXPAND | borders('rl'), 10)
         # Solve button
         self.solve_button = wx.Button(solver_box,
                                       label=self.SOLVE_BTN_INACTIVE)
-        solver_sizer.Add(self.solve_button, (5, 0), (1, 1),
+        solver_sizer.Add(self.solve_button, (6, 0), (1, 1),
                          wx.EXPAND | borders('l'), 10)
         # Reset button
         self.reset_button = wx.Button(solver_box, label='Reset')
-        solver_sizer.Add(self.reset_button, (5, 1), (1, 1),
+        solver_sizer.Add(self.reset_button, (6, 1), (1, 1),
                          wx.EXPAND | borders('r'), 10)
         # Progress bar
         self.progress = wx.Gauge(solver_box, range=100)
         # self.progress.SetMaxSize((-1, 10))
-        solver_sizer.Add(self.progress, (6, 0), (1, 2),
+        solver_sizer.Add(self.progress, (7, 0), (1, 2),
                          wx.EXPAND | borders('rbl'), 10)
         solver_box_sizer.Add(solver_sizer)
 
@@ -148,6 +153,7 @@ class SolverControls(wx.Panel):
         self.reset_button.Bind(wx.EVT_BUTTON, self._on_reset)
         self.delay.Bind(wx.EVT_SCROLL_CHANGED, self._on_delay_set)
         self.show_best.Bind(wx.EVT_CHECKBOX, self._on_show_best)
+        self.show_current.Bind(wx.EVT_CHECKBOX, self._on_show_current)
         pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_change, 'SOLVER_STATE_CHANGE')
@@ -219,6 +225,13 @@ class SolverControls(wx.Panel):
         pub.sendMessage('VIEW_OPTION_CHANGE',
                         show_best=self.show_best.GetValue())
 
+    def _on_show_current(self, event):
+        """Handles checking or unchecking 'show current path' checkboc - sends
+        `VIEW_OPTION_CHANGE` pubsub message."""
+
+        pub.sendMessage('VIEW_OPTION_CHANGE',
+                        show_current=self.show_current.GetValue())
+
     def _on_solver_change(self, solver):
         """Handles solver change event.
         """
@@ -289,6 +302,7 @@ class TSPView(wx.Panel):
         self._state = None
         # Whether to show the best path
         self.show_best = True
+        self.show_current = False
 
         # GUI
         self._init_ui()
@@ -334,7 +348,7 @@ class TSPView(wx.Panel):
         # Draw paths
         if self._state.best and (self.show_best or self._state.final):
             self._draw_path(dc, self._state.best, self.BEST_PATH_COLOR)
-        if self._state.current:
+        if self._state.current and self.show_current:
             self._draw_path(dc, self._state.current, self.CURRENT_PATH_COLOR)
         if self._state.highlight:
             self._draw_path(dc, self._state.highlight,
@@ -378,12 +392,16 @@ class TSPView(wx.Panel):
 
         self.set_state(state)
 
-    def _on_view_option_change(self, show_best):
+    def _on_view_option_change(self, show_best=None, show_current=None):
         """Handles view option change - enables or disables displaying of the
         best path.
         """
 
-        self.show_best = show_best
+        if show_best is not None:
+            self.show_best = show_best
+
+        if show_current is not None:
+            self.show_current = show_current
 
     def set_cities(self, cities):
         """Sets cities list, triggers point calculation and repaint.
