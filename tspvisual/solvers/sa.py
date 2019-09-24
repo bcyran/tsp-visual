@@ -1,9 +1,9 @@
 import time
 from copy import deepcopy
-from math import exp
+from math import exp, log
 from random import randint, random
 
-from tspvisual.solver import Property, Solver
+from tspvisual.solver import Property, Solver, SolverState
 from tspvisual.tsp import TSP, Path
 
 
@@ -18,8 +18,7 @@ class SASolver(Solver):
         Property('Cooling rate', 'cooling_rate', float, 0.01),
         Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
                  'INVERT'),
-        Property('Iterations', 'iterations', int, 450),
-        Property('Run time', 'run_time', int, 0)
+        Property('Run time [ms]', 'run_time', int, 0)
     ]
 
     def __init__(self):
@@ -27,14 +26,22 @@ class SASolver(Solver):
         self.end_temp = 0.1
         self.cooling_rate = 0.01
         self.neighbourhood = Path.Neighbourhood.INVERT
-        self.iterations = 450
         self.run_time = 0
 
-    def solve(self, tsp):
+    def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
             raise TypeError('solve() argument has to be of type \'TSP\'')
         self.tsp = tsp
+
+        # Total number of iterations or time for calculating progress
+        if steps:
+            if not self.run_time:
+                total = log(self.end_temp / self.init_temp,
+                            1 - self.cooling_rate)
+            else:
+                total = self.run_time
+            current = 0
 
         # Start with random path
         cur_path = Path(self.tsp.dimension + 1)
@@ -52,6 +59,13 @@ class SASolver(Solver):
         temp = self.init_temp
         # Repeat as long as system temperature is higher than minimum
         while True:
+            # Update iteration counter ro time counterif running in step mode
+            if steps:
+                if not self.run_time:
+                    current += 1
+                else:
+                    current = self.run_time - (end_time - self._millis())
+
             # Get random neighbour of current path
             new_path = self._rand_neigh(cur_path)
 
@@ -80,7 +94,12 @@ class SASolver(Solver):
             if self.run_time and self._millis() > end_time:
                 break
 
-        return min_path
+            # Report current solver state
+            if steps:
+                yield SolverState(current / total * 100, deepcopy(new_path),
+                                  deepcopy(min_path), False, None)
+
+        yield SolverState(100, None, deepcopy(min_path), True, None)
 
     def _rand_neigh(self, path):
         """Generates random neighbour of a given path.
