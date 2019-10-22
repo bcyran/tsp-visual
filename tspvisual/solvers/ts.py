@@ -3,7 +3,7 @@ from copy import deepcopy
 from itertools import product
 from math import inf
 
-from tspvisual.solver import Property, Solver
+from tspvisual.solver import Property, Solver, SolverState
 from tspvisual.solvers.greedy import GreedySolver
 from tspvisual.tsp import TSP, Path
 
@@ -38,16 +38,20 @@ class TSSolver(Solver):
         self._tabu = [[0 for _ in range(self.tsp.dimension)]
                       for _ in range(self.tsp.dimension)]
 
-    def solve(self, tsp):
+    def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
             raise TypeError('solve() argument has to be of type \'TSP\'')
         self.tsp = tsp
         self._setup()
 
+        # Total iteration number or time for calculating progress
+        if steps:
+            total = self.run_time if self.run_time else self.iterations
+
         # Starting path from a greedy solver
-        greedy_solver = GreedySolver(self.tsp)
-        cur_path = greedy_solver.solve()
+        greedy_solver = GreedySolver()
+        cur_path = greedy_solver.result(self.tsp)
         # Current minimum path
         min_path = deepcopy(cur_path)
 
@@ -56,9 +60,17 @@ class TSSolver(Solver):
         # Counter of iterations since last improvement
         stop_counter = 0
         # Timestamp when search should be ended
-        end_time = self._millis() + self.run_time
+        start_time = self._millis()
+        end_time = start_time + self.run_time
 
-        for _ in range(self.iterations):
+        for i in range(self.iterations):
+            # Current iteration number or time
+            if steps:
+                current = i if not self.run_time else \
+                    (self._millis() - start_time)
+                yield SolverState(current / total * 100, cur_path, min_path,
+                                  None, None)
+
             # Find best neighbour of the current path
             cur_path = self._min_neighbour(cur_path)
 
@@ -82,7 +94,7 @@ class TSSolver(Solver):
             if self.run_time and self._millis() > end_time:
                 break
 
-        return min_path
+        yield SolverState(1, None, min_path, True, None)
 
     def _min_neighbour(self, path):
         """Finds shortest neighbour of the given path.
