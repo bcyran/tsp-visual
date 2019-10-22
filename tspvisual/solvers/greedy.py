@@ -40,9 +40,7 @@ class GreedySolver(Solver):
                     path[i] = j
 
             if steps:
-                hihglight = Path(path=path[i-1:i+1])
-                yield SolverState(i / (len(path) - 1) * 100,
-                                  deepcopy(path), None, False, hihglight)
+                yield SolverState(i / (len(path) - 1), deepcopy(path), None)
 
         path.distance = self.tsp.path_dist(path)
-        yield SolverState(100, None, deepcopy(path), True, None)
+        yield SolverState(1, None, deepcopy(path), True)

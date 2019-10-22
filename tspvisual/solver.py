@@ -1,8 +1,8 @@
 import abc
 from collections import namedtuple
 
-SolverState = namedtuple('SolverState',
-                         'progress current best final highlight')
+SolverState = namedtuple('SolverState', 'progress current best final',
+                         defaults=[False])
 
 Property = namedtuple('Property', 'name field type default')
 

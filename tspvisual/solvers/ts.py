@@ -64,12 +64,12 @@ class TSSolver(Solver):
         end_time = start_time + self.run_time
 
         for i in range(self.iterations):
-            # Current iteration number or time
+            # Yield the solver state
             if steps:
+                # Current iteration number or time
                 current = i if not self.run_time else \
                     (self._millis() - start_time)
-                yield SolverState(current / total * 100, cur_path, min_path,
-                                  None, None)
+                yield SolverState(current / total, cur_path, min_path)
 
             # Find best neighbour of the current path
             cur_path = self._min_neighbour(cur_path)
@@ -94,7 +94,7 @@ class TSSolver(Solver):
             if self.run_time and self._millis() > end_time:
                 break
 
-        yield SolverState(1, None, min_path, True, None)
+        yield SolverState(1, None, min_path, True)
 
     def _min_neighbour(self, path):
         """Finds shortest neighbour of the given path.

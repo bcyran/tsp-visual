@@ -96,10 +96,10 @@ class SASolver(Solver):
 
             # Report current solver state
             if steps:
-                yield SolverState(current / total * 100, deepcopy(new_path),
-                                  deepcopy(min_path), False, None)
+                yield SolverState(current / total, deepcopy(new_path),
+                                  deepcopy(min_path))
 
-        yield SolverState(100, None, deepcopy(min_path), True, None)
+        yield SolverState(1, None, deepcopy(min_path), True)
 
     def _rand_neigh(self, path):
         """Generates random neighbour of a given path.

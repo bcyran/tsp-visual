@@ -256,7 +256,7 @@ class SolverControls(wx.Panel):
 
         result = state.best.distance
         self.result.SetLabel(str(result))
-        self.progress.SetValue(state.progress)
+        self.progress.SetValue(state.progress * 100)
 
         # If this is final result
         if state.final:
@@ -290,7 +290,6 @@ class TSPView(wx.Panel):
     CITY_COLOR = 'black'
     CURRENT_PATH_COLOR = 'black'
     BEST_PATH_COLOR = 'red'
-    HIGHLIGHT_PATH_COLOR = 'blue'
 
     def __init__(self, parent):
         super(TSPView, self).__init__(parent)
@@ -350,9 +349,6 @@ class TSPView(wx.Panel):
             self._draw_path(dc, self._state.best, self.BEST_PATH_COLOR)
         if self._state.current and self.show_current:
             self._draw_path(dc, self._state.current, self.CURRENT_PATH_COLOR)
-        if self._state.highlight:
-            self._draw_path(dc, self._state.highlight,
-                            self.HIGHLIGHT_PATH_COLOR)
 
     def _draw_path(self, dc, path, color):
         """Utility method to draw a path on the given device context.

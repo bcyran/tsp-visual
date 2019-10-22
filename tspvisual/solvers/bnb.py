@@ -52,8 +52,8 @@ class BnBSolver(Solver):
             if level == self.tsp.dimension - 1:
                 # Yield the current state
                 if steps:
-                    yield SolverState(current / total * 100, deepcopy(path),
-                                      deepcopy(min_path), False, None)
+                    yield SolverState(current / total, deepcopy(path),
+                                      deepcopy(min_path))
                 # Distance of full path with return to 0
                 new_dist = dist + self.tsp.dist(city, 0)
                 # Keep it if it's better than the current minimum
@@ -77,4 +77,4 @@ class BnBSolver(Solver):
                 # If it's valid node push it onto stack
                 stack.append((i, next_dist, next_level))
 
-        yield SolverState(100, None, deepcopy(min_path), True, None)
+        yield SolverState(1, None, deepcopy(min_path), True)

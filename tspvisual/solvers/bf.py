@@ -42,7 +42,7 @@ class BFSolver(Solver):
             if steps:
                 # Need to use deepcopies because object could change before the
                 # reference will be used
-                yield SolverState(i / total * 100, deepcopy(path),
-                                  deepcopy(min_path), False, None)
+                yield SolverState(i / total, deepcopy(path),
+                                  deepcopy(min_path))
 
-        yield SolverState(100, None, min_path, True, None)
+        yield SolverState(1, None, min_path, True)
