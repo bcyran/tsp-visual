@@ -3,7 +3,7 @@ from copy import deepcopy
 from enum import Enum
 from random import randint, random
 
-from tspvisual.solver import Property, Solver
+from tspvisual.solver import Property, Solver, SolverState
 from tspvisual.tsp import TSP, Path
 
 
@@ -36,7 +36,7 @@ class GASolver(Solver):
         self._population = []
         self._mating_pool = []
 
-    def solve(self, tsp):
+    def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
             raise TypeError('solve() argument has to be of type \'TSP\'')
@@ -46,8 +46,13 @@ class GASolver(Solver):
         self._init_population()
         min_path = self._population[0]
 
-        # End time
-        end_time = self._millis() + self.run_time
+        # Start and end time
+        start_time = self._millis()
+        end_time = start_time + self.run_time
+
+        # Total number of iterations or runtime
+        if steps:
+            total = self.generations if not self.run_time else self.run_time
 
         # Number of evolved generations
         evolved = 0
@@ -70,6 +75,13 @@ class GASolver(Solver):
             # Increment generation counter
             evolved += 1
 
+            if steps:
+                current = evolved if not self.run_time else \
+                    (end_time - self._millis())
+                yield SolverState(current / total,
+                                  deepcopy(self._population[0]),
+                                  deepcopy(min_path))
+
             # Terminate evolution after reaching generations limit
             if not self.run_time and evolved >= self.generations:
                 break
@@ -78,7 +90,7 @@ class GASolver(Solver):
             if self.run_time and self._millis() > end_time:
                 break
 
-        return min_path
+        yield SolverState(1, None, deepcopy(min_path), True)
 
     def _init_population(self):
         """Initializes population by creating specified number of random paths.
