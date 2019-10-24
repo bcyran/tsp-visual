@@ -298,6 +298,7 @@ class GASolver(Solver):
             if random() >= self.mutation_rate:
                 i, j = self._rand_subpath()
                 path.move(self.mutation_type, i, j)
+                path.distance = self.tsp.path_dist(path)
 
     def _rand_subpath(self):
         """Randomly chooses two stops in path creating random subpath.
