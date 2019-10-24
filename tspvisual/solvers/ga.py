@@ -295,7 +295,7 @@ class GASolver(Solver):
         """
 
         for path in self._population[self.elite_size:]:
-            if random() >= self.mutation_rate:
+            if random() <= self.mutation_rate:
                 i, j = self._rand_subpath()
                 path.move(self.mutation_type, i, j)
                 path.distance = self.tsp.path_dist(path)
