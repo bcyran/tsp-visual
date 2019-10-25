@@ -24,6 +24,7 @@ class TSSolver(Solver):
     ]
 
     def __init__(self):
+        super().__init__()
         self.iterations = 1000
         self.cadence = 18
         self.neighbourhood = Path.Neighbourhood.INVERT
@@ -47,7 +48,8 @@ class TSSolver(Solver):
 
         # Total iteration number or time for calculating progress
         if steps:
-            total = self.run_time if self.run_time else self.iterations
+            total_time = self.run_time * (10 ** 6)
+            total = total_time if self.run_time else self.iterations
 
         # Starting path from a greedy solver
         greedy_solver = GreedySolver()
@@ -59,17 +61,17 @@ class TSSolver(Solver):
         reset_counter = 0
         # Counter of iterations since last improvement
         stop_counter = 0
-        # Timestamp when search should be ended
-        start_time = self._millis()
-        end_time = start_time + self.run_time
+
+        # Start the timer
+        self._start_timer()
 
         for i in range(self.iterations):
             # Yield the solver state
             if steps:
                 # Current iteration number or time
-                current = i if not self.run_time else \
-                    (self._millis() - start_time)
-                yield SolverState(current / total, cur_path, min_path)
+                current = i if not self.run_time else self._time()
+                yield SolverState(self._time(), current / total,
+                                  deepcopy(cur_path), deepcopy(min_path))
 
             # Find best neighbour of the current path
             cur_path = self._min_neighbour(cur_path)
@@ -91,10 +93,10 @@ class TSSolver(Solver):
             self._update_tabu()
 
             # Terminate search after exceeding specified runtime
-            if self.run_time and self._millis() > end_time:
+            if self.run_time and self._time() >= self.run_time * (10 ** 6):
                 break
 
-        yield SolverState(1, None, min_path, True)
+        yield SolverState(self._time(), 1, None, deepcopy(min_path), True)
 
     def _min_neighbour(self, path):
         """Finds shortest neighbour of the given path.
@@ -147,12 +149,3 @@ class TSSolver(Solver):
         for i, j in product(range(self.tsp.dimension), repeat=2):
             if self._tabu[i][j] > 0:
                 self._tabu[i][j] -= 1
-
-    def _millis(self):
-        """Returns current timestamp in milliseconds.
-
-        :return: Time since epoch in milliseconds.
-        :rtype: int
-        """
-
-        return int(round(time.time() * 1000))

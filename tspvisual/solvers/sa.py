@@ -1,4 +1,3 @@
-import time
 from copy import deepcopy
 from math import exp, log
 from random import randint, random
@@ -22,6 +21,7 @@ class SASolver(Solver):
     ]
 
     def __init__(self):
+        super().__init__()
         self.init_temp = 100
         self.end_temp = 0.1
         self.cooling_rate = 0.01
@@ -36,12 +36,9 @@ class SASolver(Solver):
 
         # Total number of iterations or time for calculating progress
         if steps:
-            if not self.run_time:
-                total = log(self.end_temp / self.init_temp,
-                            1 - self.cooling_rate)
-            else:
-                total = self.run_time
             current = 0
+            iters = log(self.end_temp / self.init_temp, 1 - self.cooling_rate)
+            total = (self.run_time * (10 ** 6)) if self.run_time else iters
 
         # Start with random path
         cur_path = Path(self.tsp.dimension + 1)
@@ -52,8 +49,8 @@ class SASolver(Solver):
         # And set it as current minimum
         min_path = deepcopy(cur_path)
 
-        # Timestamp when search should be ended
-        end_time = self._millis() + self.run_time
+        # Start the timer
+        self._start_timer()
 
         # Init temperature
         temp = self.init_temp
@@ -61,10 +58,7 @@ class SASolver(Solver):
         while True:
             # Update iteration counter ro time counterif running in step mode
             if steps:
-                if not self.run_time:
-                    current += 1
-                else:
-                    current = self.run_time - (end_time - self._millis())
+                current = self._time() if self.run_time else current + 1
 
             # Get random neighbour of current path
             new_path = self._rand_neigh(cur_path)
@@ -91,15 +85,16 @@ class SASolver(Solver):
                 break
 
             # Terminate search after exceeding specified runtime
-            if self.run_time and self._millis() > end_time:
+            # We use `total` to not have to convert to nanoseconds every time
+            if self.run_time and self._time() >= self.run_time * (10 ** 6):
                 break
 
             # Report current solver state
             if steps:
-                yield SolverState(current / total, deepcopy(new_path),
-                                  deepcopy(min_path))
+                yield SolverState(self._time(), current / total,
+                                  deepcopy(new_path), deepcopy(min_path))
 
-        yield SolverState(1, None, deepcopy(min_path), True)
+        yield SolverState(self._time(), 1, None, deepcopy(min_path), True)
 
     def _rand_neigh(self, path):
         """Generates random neighbour of a given path.
@@ -119,12 +114,3 @@ class SASolver(Solver):
         neighbour.distance = self.tsp.path_dist(neighbour)
 
         return neighbour
-
-    def _millis(self):
-        """Returns current timestamp in milliseconds.
-
-        :return: Time since epoch in milliseconds.
-        :rtype: int
-        """
-
-        return int(round(time.time() * 1000))

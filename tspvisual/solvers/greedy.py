@@ -12,6 +12,9 @@ class GreedySolver(Solver):
     name = 'Greedy'
     properties = []
 
+    def __init__(self):
+        super().__init__()
+
     def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
@@ -21,6 +24,9 @@ class GreedySolver(Solver):
         # Path will always start and end in 0
         path = Path(self.tsp.dimension + 1)
         path[0] = path[-1] = 0
+
+        # Start timer
+        self._start_timer()
 
         # For each stop except the first and last one
         for i in range(1, len(path) - 1):
@@ -40,7 +46,8 @@ class GreedySolver(Solver):
                     path[i] = j
 
             if steps:
-                yield SolverState(i / (len(path) - 1), deepcopy(path), None)
+                progress = i / (len(path) - 1)
+                yield SolverState(self._time(), progress, deepcopy(path), None)
 
         path.distance = self.tsp.path_dist(path)
-        yield SolverState(1, None, deepcopy(path), True)
+        yield SolverState(self._time(), 1, None, deepcopy(path), True)
