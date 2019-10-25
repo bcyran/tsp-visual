@@ -1,7 +1,8 @@
 import abc
+import time
 from collections import namedtuple
 
-SolverState = namedtuple('SolverState', 'progress current best final',
+SolverState = namedtuple('SolverState', 'time progress current best final',
                          defaults=[False])
 
 Property = namedtuple('Property', 'name field type default')
@@ -11,6 +12,9 @@ class Solver(abc.ABC):
     """TSP solver base class. Defines interface for getting solver name and
     properties as well as solving TSP instances.
     """
+
+    def __init__(self):
+        self._start_time = 0
 
     @property
     @abc.abstractmethod
@@ -61,3 +65,15 @@ class Solver(abc.ABC):
         """
 
         return next(self.solve(tsp, steps=False)).best
+
+    def _start_timer(self):
+        """Stores current time for further calculations of run time.
+        """
+
+        self._start_time = time.time_ns()
+
+    def _time(self):
+        """Calculates time elapsed since calling `_start_timer`.
+        """
+
+        return time.time_ns() - self._start_time
