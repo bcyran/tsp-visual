@@ -165,22 +165,19 @@ class GASolver(Solver):
         # Copy random subpath from parent 1 to child
         start, end = self._rand_subpath()
         subpath = parent1.path[start:end+1]
-        child[start:end+1] = subpath
+        tmp = parent2.path
 
-        # Fill in rest of the cities from parent2 starting after the end
-        # of copied subpath
-        child_pos = parent_pos = end + 1
-        while child_pos != start:
-            # Look for city that is not in copied subpath, wrap search
-            # to the beginning after reaching end
-            while parent2[parent_pos] in subpath:
-                parent_pos = (parent_pos + 1) % len(parent1)
+        # Rotate tmp with pivot in the end + 1
+        tmp = tmp[end+1:] + tmp[:end+1]
+        # Remove cities found in subpath from parent 2
+        tmp = list(filter(lambda x: x not in subpath, tmp))
 
-            # Set stop in child path
-            child[child_pos] = parent2[parent_pos]
-            # Increment child position and wrap to the beginning if necessary
-            child_pos = (child_pos + 1) % len(parent1)
-            parent_pos = (parent_pos + 1) % len(parent1)
+        # Join subpath and tmp to form a child
+        child.path = subpath + tmp
+
+        # Rotate the path so it always starts at 0
+        last_zero_idx = len(child) - child[::-1].index(0) - 1
+        child.path = child[last_zero_idx:] + child[:last_zero_idx]
 
         child.distance = self.tsp.path_dist(child)
         return child
