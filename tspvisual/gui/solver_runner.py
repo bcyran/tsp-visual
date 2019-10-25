@@ -22,7 +22,7 @@ class SolverRunner(threading.Thread):
         threading.Thread.__init__(self)
 
         # Results queue
-        self.results = multiprocessing.SimpleQueue()
+        self.results = multiprocessing.Queue()
 
         # Solver and TSP instance
         self._solver = solver
@@ -89,7 +89,7 @@ class SolverProcess(multiprocessing.Process):
         """
 
         for state in self._solver.solve(self._tsp):
-            self._queue.put(state)
+            self._queue.put_nowait(state)
 
             if self._stop_event.is_set():
                 break
