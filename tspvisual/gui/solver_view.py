@@ -251,12 +251,15 @@ class SolverControls(wx.Panel):
         :param SolverState state: New solver state.
         """
 
-        if not state or not state.best:
+        if not state:
             return
 
-        result = state.best.distance
-        self.result.SetLabel(str(result))
-        self.progress.SetValue(state.progress * 100)
+        if state.progress:
+            self.progress.SetValue(state.progress * 100)
+
+        if state.best:
+            result = state.best.distance
+            self.result.SetLabel(str(result))
 
         # If this is final result
         if state.final:
