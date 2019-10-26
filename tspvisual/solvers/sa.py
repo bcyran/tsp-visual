@@ -38,7 +38,7 @@ class SASolver(Solver):
         if steps:
             current = 0
             iters = log(self.end_temp / self.init_temp, 1 - self.cooling_rate)
-            total = (self.run_time * (10 ** 6)) if self.run_time else iters
+            total = self.run_time if self.run_time else iters
 
         # Start with random path
         cur_path = Path(self.tsp.dimension + 1)
@@ -58,7 +58,7 @@ class SASolver(Solver):
         while True:
             # Update iteration counter ro time counterif running in step mode
             if steps:
-                current = self._time() if self.run_time else current + 1
+                current = self._time_ms() if self.run_time else current + 1
 
             # Get random neighbour of current path
             new_path = self._rand_neigh(cur_path)
@@ -86,7 +86,7 @@ class SASolver(Solver):
 
             # Terminate search after exceeding specified runtime
             # We use `total` to not have to convert to nanoseconds every time
-            if self.run_time and self._time() >= self.run_time * (10 ** 6):
+            if self.run_time and self._time_ms() >= self.run_time:
                 break
 
             # Report current solver state

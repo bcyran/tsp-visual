@@ -47,8 +47,7 @@ class TSSolver(Solver):
 
         # Total iteration number or time for calculating progress
         if steps:
-            total_time = self.run_time * (10 ** 6)
-            total = total_time if self.run_time else self.iterations
+            total = self.run_time if self.run_time else self.iterations
 
         # Starting path from a greedy solver
         greedy_solver = GreedySolver()
@@ -68,7 +67,7 @@ class TSSolver(Solver):
             # Yield the solver state
             if steps:
                 # Current iteration number or time
-                current = i if not self.run_time else self._time()
+                current = i if not self.run_time else self._time_ms()
                 yield SolverState(self._time(), current / total,
                                   deepcopy(cur_path), deepcopy(min_path))
 
@@ -92,7 +91,7 @@ class TSSolver(Solver):
             self._update_tabu()
 
             # Terminate search after exceeding specified runtime
-            if self.run_time and self._time() >= self.run_time * (10 ** 6):
+            if self.run_time and self._time_ms() >= self.run_time:
                 break
 
         yield SolverState(self._time(), 1, None, deepcopy(min_path), True)

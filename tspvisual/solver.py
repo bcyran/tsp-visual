@@ -77,3 +77,9 @@ class Solver(abc.ABC):
         """
 
         return time.time_ns() - self._start_time
+
+    def _time_ms(self):
+        """Returns time elapsed since calling `_start_timer` in milliseconds.
+        """
+
+        return self._time() // (10 ** 6)
