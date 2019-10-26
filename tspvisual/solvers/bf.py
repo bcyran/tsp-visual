@@ -13,6 +13,9 @@ class BFSolver(Solver):
     name = 'Brute Force'
     properties = []
 
+    def __init__(self):
+        super().__init__()
+
     def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
@@ -31,6 +34,9 @@ class BFSolver(Solver):
         if steps:
             total = factorial(self.tsp.dimension - 1)
 
+        # Start the timer
+        self._start_timer()
+
         # Loop through all permutations to find the shortest path
         for i, perm in enumerate(perms):
             path.path = [0] + list(perm) + [0]
@@ -42,7 +48,7 @@ class BFSolver(Solver):
             if steps:
                 # Need to use deepcopies because object could change before the
                 # reference will be used
-                yield SolverState(i / total, deepcopy(path),
+                yield SolverState(self._time(), i / total, deepcopy(path),
                                   deepcopy(min_path))
 
-        yield SolverState(1, None, min_path, True)
+        yield SolverState(self._time(), 1, None, min_path, True)

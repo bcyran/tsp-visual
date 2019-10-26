@@ -26,6 +26,7 @@ class GASolver(Solver):
     ]
 
     def __init__(self):
+        super().__init__()
         self.population_size = 80
         self.elite_size = 30
         self.mutation_rate = 0.05
@@ -46,16 +47,15 @@ class GASolver(Solver):
         self._init_population()
         min_path = self._population[0]
 
-        # Start and end time
-        start_time = self._millis()
-        end_time = start_time + self.run_time
-
         # Total number of iterations or runtime
         if steps:
             total = self.generations if not self.run_time else self.run_time
 
         # Number of evolved generations
         evolved = 0
+
+        # Start the timer
+        self._start_timer()
 
         # Repeat until end conditions are met
         while True:
@@ -76,9 +76,8 @@ class GASolver(Solver):
             evolved += 1
 
             if steps:
-                current = evolved if not self.run_time else \
-                    (end_time - self._millis())
-                yield SolverState(current / total,
+                current = evolved if not self.run_time else self._time_ms()
+                yield SolverState(self._time(), current / total,
                                   deepcopy(self._population[0]),
                                   deepcopy(min_path))
 
@@ -87,10 +86,10 @@ class GASolver(Solver):
                 break
 
             # Terminate search after exceeding specified runtime
-            if self.run_time and self._millis() > end_time:
+            if self.run_time and self._time_ms() >= self.run_time:
                 break
 
-        yield SolverState(1, None, deepcopy(min_path), True)
+        yield SolverState(self._time(), 1, None, deepcopy(min_path), True)
 
     def _init_population(self):
         """Initializes population by creating specified number of random paths.

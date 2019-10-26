@@ -12,6 +12,9 @@ class BnBSolver(Solver):
     name = 'Branch and Bound'
     properties = []
 
+    def __init__(self):
+        super().__init__()
+
     def solve(self, tsp, steps=True):
         # Make sure given argument is of correct type
         if not isinstance(tsp, TSP):
@@ -35,6 +38,9 @@ class BnBSolver(Solver):
         # Add starting city (0) to the stack
         stack.append((0, 0, 0))
 
+        # Start the timer
+        self._start_timer()
+
         while len(stack) > 0:
             # Increment step counter
             if steps:
@@ -52,8 +58,8 @@ class BnBSolver(Solver):
             if level == self.tsp.dimension - 1:
                 # Yield the current state
                 if steps:
-                    yield SolverState(current / total, deepcopy(path),
-                                      deepcopy(min_path))
+                    yield SolverState(self._time(), current / total,
+                                      deepcopy(path), deepcopy(min_path))
                 # Distance of full path with return to 0
                 new_dist = dist + self.tsp.dist(city, 0)
                 # Keep it if it's better than the current minimum
@@ -77,4 +83,4 @@ class BnBSolver(Solver):
                 # If it's valid node push it onto stack
                 stack.append((i, next_dist, next_level))
 
-        yield SolverState(1, None, deepcopy(min_path), True)
+        yield SolverState(self._time(), 1, None, deepcopy(min_path), True)
