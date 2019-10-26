@@ -37,19 +37,28 @@ class SolverStats(wx.Panel):
         """
 
         self.best_canvas.Clear()
+        self.current_canvas.Clear()
+
+        if len(self.results) > 0:
+            x_max = self.results[-1].time
+            self.best_canvas.xSpec = (0, x_max)
+            self.current_canvas.xSpec = (0, x_max)
+
         best_points = [(r.time, r.best.distance) for r in self.results
                        if r.best is not None]
         best_line = PolyLine(best_points)
-        best_plot = PlotGraphics([best_line], title='Best path',
+        best_plot = PlotGraphics([best_line],
+                                 title='Best path distance over time',
                                  xLabel='Time [ns]', yLabel='Distance')
-        self.best_canvas.Draw(best_plot)
 
-        self.current_canvas.Clear()
         current_points = [(r.time, r.current.distance) for r in self.results
                           if r.current is not None]
         current_line = PolyLine(current_points)
-        current_plot = PlotGraphics([current_line], title='Current path',
+        current_plot = PlotGraphics([current_line],
+                                    title='Current path distance over time',
                                     xLabel='Time [ns]', yLabel='Distance')
+
+        self.best_canvas.Draw(best_plot)
         self.current_canvas.Draw(current_plot)
 
     def _on_solver_state_end(self, results):
