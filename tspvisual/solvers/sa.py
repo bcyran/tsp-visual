@@ -69,7 +69,7 @@ class SASolver(Solver):
             # If it's shorter or equal
             if delta_dist <= 0:
                 # If it's shorter set it as current minimum
-                if delta_dist < 0:
+                if new_path.distance < min_path.distance:
                     min_path = deepcopy(new_path)
                 # Set new path as current path
                 cur_path = deepcopy(new_path)
