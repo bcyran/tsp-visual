@@ -22,7 +22,10 @@ class SolverRunner(threading.Thread):
         threading.Thread.__init__(self)
 
         # Results queue
-        self.results = multiprocessing.Queue()
+        self._queue = multiprocessing.Queue()
+
+        # Results list
+        self.results = []
 
         # Solver and TSP instance
         self._solver = solver
@@ -40,12 +43,13 @@ class SolverRunner(threading.Thread):
 
         # Start solver process
         self.solver_process = SolverProcess(
-            self._solver, self._tsp, self.results)
+            self._solver, self._tsp, self._queue)
         self.solver_process.start()
 
         # Start reading SolverState objects from the queue
         while not self._stop_event.is_set():
-            state = self.results.get()
+            state = self._queue.get()
+            self.results.append(state)
 
             # Send message with the new state to GUI
             wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_CHANGE', state=state)
@@ -56,6 +60,9 @@ class SolverRunner(threading.Thread):
 
             # Sleep specified amount of itme
             time.sleep(self.delay)
+
+        # Send information that solving has ended
+        wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_END', results=self.results)
 
         # Wait for the solver process
         self.solver_process.join()
@@ -76,7 +83,7 @@ class SolverProcess(multiprocessing.Process):
     def __init__(self, solver, tsp, queue):
         multiprocessing.Process.__init__(self)
 
-        # Queue for storing results
+        # Queue for storing queue
         self._solver = solver
         self._tsp = tsp
         self._queue = queue
