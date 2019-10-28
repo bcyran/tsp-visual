@@ -1,6 +1,8 @@
+import filecmp
 import unittest
+from tempfile import NamedTemporaryFile
 
-from tspvisual.tsplib import TSPLib
+from tspvisual.tsplib import TSPLib, TSPLibTour
 
 
 class TestTSPLib(unittest.TestCase):
@@ -102,3 +104,40 @@ class TestTSPLib(unittest.TestCase):
             with self.subTest(i=i, j=j):
                 result = self.tsplib.weight(i, j)
                 self.assertEqual(result, expected)
+
+
+class TestTSPLibTour(unittest.TestCase):
+
+    def setUp(self):
+        self.tsplibtour = TSPLibTour()
+        self.expected_spec = {
+            'NAME': 'bayg29.opt.tour',
+            'COMMENT': 'Optimum solution of bayg29',
+            'TYPE': 'TOUR',
+            'DIMENSION': 29,
+        }
+        self.expected_tour = [1, 28, 6, 12, 9, 26, 3, 29, 5, 21, 2, 20, 10, 4,
+                              15, 18, 14, 17, 22, 11, 19, 25, 7, 23, 8, 27, 16,
+                              13, 24]
+
+    def test_specification(self):
+        self.tsplibtour.load('tests/fixtures/bayg29.opt.tour')
+        self.assertDictEqual(self.tsplibtour.specification, self.expected_spec)
+
+    def test_tour(self):
+        self.tsplibtour.load('tests/fixtures/bayg29.opt.tour')
+        self.assertListEqual(self.tsplibtour.tour, self.expected_tour)
+
+    def test_exception(self):
+        with self.assertRaises(TypeError):
+            self.tsplibtour.load('tests/fixtures/bayg29.tsp')
+
+    def test_write(self):
+        with NamedTemporaryFile() as result_file:
+            self.tsplibtour = TSPLibTour()
+            self.tsplibtour.specification = self.expected_spec
+            self.tsplibtour.tour = self.expected_tour
+            self.tsplibtour.write(result_file.name)
+            result = filecmp.cmp(result_file.name,
+                                 'tests/fixtures/bayg29.opt.tour')
+            self.assertTrue(result)

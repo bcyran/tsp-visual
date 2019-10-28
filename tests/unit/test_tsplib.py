@@ -1,6 +1,7 @@
 import unittest
 
-from tspvisual.tsplib import Lines, TSPLib
+from tspvisual.tsp import Path
+from tspvisual.tsplib import Lines, TSPLib, TSPLibTour
 
 
 class TestTSPLib(unittest.TestCase):
@@ -214,3 +215,87 @@ class TestTSPLib(unittest.TestCase):
                 self.tsplib.specification['EDGE_WEIGHT_TYPE'] = ewt
                 result = self.tsplib.weight(i, j)
                 self.assertEqual(result, expected)
+
+
+class TestTSPLibTour(unittest.TestCase):
+
+    def setUp(self):
+        self.tsplibtour = TSPLibTour()
+
+    def test_from_path(self):
+        data = [
+            ([0, 1, 2, 3, 4, 5, 6, 0], [1, 2, 3, 4, 5, 6, 7]),
+            ([0, 1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7]),
+            ([9, 8, 7, 6, 5, 4], [10, 9, 8, 7, 6, 5]),
+            ([3, 2, 1, 0, 6, 5, 4, 3], [4, 3, 2, 1, 7, 6, 5])
+        ]
+
+        for path, expected in data:
+            with self.subTest(path=path):
+                p = Path(path=path)
+                result = TSPLibTour.from_path(p).tour
+                self.assertListEqual(result, expected)
+
+    def test_parse_spec(self):
+        data = [
+            ('NAME : gr17', 'NAME', 'gr17'),
+            ('TYPE: TOUR', 'TYPE', 'TOUR'),
+            ('DIMENSION    :    17', 'DIMENSION', 17)
+        ]
+
+        for line, key, value in data:
+            with self.subTest(line=line):
+                self.tsplibtour._lines = Lines([line])
+                result = self.tsplibtour._parse_spec()
+                expected = {key: value}
+                self.assertDictEqual(result, expected)
+
+    def test_parse_tour(self):
+        data = [
+            (['1', '2', '3', '4', '5', '-1'], [1, 2, 3, 4, 5]),
+            (['100', '69', '123456', '666', '-1'], [100, 69, 123456, 666]),
+            (['7', '6', '5', '4', '3', '2', '1'], [7, 6, 5, 4, 3, 2, 1]),
+            (['1', '2', '3', '4', '5', 'EOF'], [1, 2, 3, 4, 5]),
+        ]
+
+        for lines, expected in data:
+            with self.subTest(lines=lines):
+                self.tsplibtour._lines = Lines(lines)
+                result = self.tsplibtour._parse_tour()
+                self.assertListEqual(result, expected)
+
+    def test_parse(self):
+        data = [
+            'TYPE : TOUR',
+            'DIMENSION : 5',
+            'TOUR_SECTION',
+            '1',
+            '4',
+            '3',
+            '5',
+            '2',
+            '-1',
+            'EOF'
+        ]
+        expected_spec = {'TYPE': 'TOUR', 'DIMENSION': 5}
+        expected_tour = [1, 4, 3, 5, 2]
+
+        self.tsplibtour.specification = {}
+        self.tsplibtour._lines = Lines(data)
+        self.tsplibtour._parse()
+
+        self.assertDictEqual(self.tsplibtour.specification, expected_spec)
+        self.assertListEqual(self.tsplibtour.tour, expected_tour)
+
+    def test_parse_exception(self):
+        data = [
+            (['TYPE : TSP', 'EOF'], True),
+            (['TYPE : ATSP', 'EOF'], True)
+        ]
+
+        for lines, expected in data:
+            with self.subTest(lines=lines):
+                self.tsplibtour._lines = Lines(lines)
+
+                with self.assertRaises(TypeError):
+                    self.tsplibtour._parse()
