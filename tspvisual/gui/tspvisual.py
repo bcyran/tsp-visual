@@ -98,7 +98,7 @@ class TSPVisual(wx.Frame):
 
         # Present file picker and try to load selected instance
         with (wx.FileDialog(self, 'Open tsp instance.',
-              wildcard='*.tsp',
+              wildcard='TSPLIB (*.tsp)|*.tsp',
               style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)) as file_dialog:
 
             if file_dialog.ShowModal() == wx.ID_CANCEL:
@@ -129,7 +129,7 @@ class TSPVisual(wx.Frame):
 
         # Present file picker and try to load selected instance
         with (wx.FileDialog(self, 'Save solver data.',
-              wildcard='*.csv',
+              wildcard='CSV files (*.csv)|*.csv',
               style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)) as file_dialog:
 
             if file_dialog.ShowModal() == wx.ID_CANCEL:
