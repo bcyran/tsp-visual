@@ -3,6 +3,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from tspvisual.tsp import TSP, Path, TSPLib
+from tspvisual.tsplib import TSPLibTour
 
 
 class TestPath(unittest.TestCase):
@@ -13,6 +14,20 @@ class TestPath(unittest.TestCase):
             self.assertListEqual(result._path, [-1] * i)
             self.assertEqual(len(result), i)
             self.assertEqual(result.distance, -1)
+
+    def test_from_tour(self):
+        data = [
+            ([1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 0]),
+            ([1, 2, 3, 4, 5, 6, 1], [0, 1, 2, 3, 4, 5, 0]),
+            ([5, 1, 3, 4, 2], [4, 0, 2, 3, 1, 4])
+        ]
+
+        for tour, expected in data:
+            with self.subTest(tour=tour):
+                tsplibtour = TSPLibTour()
+                tsplibtour.tour = tour
+                path = Path.from_tour(tsplibtour)
+                self.assertListEqual(path.path, expected)
 
     def test_set_stop(self):
         data = [

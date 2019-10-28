@@ -130,6 +130,21 @@ class Path:
         self.length = length if path is None else len(path)
         self.distance = -1
 
+    @classmethod
+    def from_tour(cls, tour):
+        """Creates Path from TSPLibTour object.
+        """
+
+        # TSPLIB starts indexing cities from 1, we start from 0
+        path = [s - 1 for s in tour.tour]
+
+        # TSPLIB doesn't store explicit return to the start, but we check just
+        # in case before adding it
+        if path[0] != path[-1]:
+            path.append(path[0])
+
+        return cls(path=path)
+
     @property
     def path(self):
         """Sequence of numbers representing consecutive cities visited in path.
