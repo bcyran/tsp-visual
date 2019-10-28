@@ -22,7 +22,7 @@ class TSPLib:
     """
 
     # Names of properties of integer type (all others are strings)
-    _INT_PROPERTIES = ['DIMENSION', 'CAPACITY']
+    _INT_PROPERTIES = ['DIMENSION']
 
     def __init__(self, file=None):
         self._lines = None
@@ -235,3 +235,143 @@ class TSPLib:
         """
 
         return int(x + 0.5)
+
+
+class TSPLibTour:
+    """Simple parser and writer for TSPLIB .tour files.
+    """
+
+    # Names of properties of integer type (all others are strings)
+    _INT_PROPERTIES = ['DIMENSION']
+
+    def __init__(self, file=None):
+        # Initialize fileds
+        self._lines = None
+        self.specification = {}
+        self.tour = []
+
+        # Load from file if file is given
+        if file:
+            self.load(file)
+
+    def load(self, file):
+        """Loads lines from file, creates Lines iterable and starts parsing.
+
+        :param string file: File to load.
+        """
+
+        with open(file, 'r') as f:
+            self._lines = Lines(f.read().splitlines())
+
+        self._parse()
+
+    @classmethod
+    def from_path(cls, path):
+        """Creates TSPLibTour object from given path.
+
+        :param Path path: Path to convert to TSPLibTour.
+        :return: Tour coverted from path.
+        :rtype: TSPLibTour
+        """
+
+        obj = cls()
+        # TSPLib counts cities from 1, we start from 0
+        tour = [s + 1 for s in path]
+        # TSPLib doesn't include return to the starting city
+        if tour[0] == tour[-1]:
+            tour = tour[:-1]
+        obj.tour = tour
+
+        return obj
+
+    def write(self, file):
+        """Writes TSPLibTour to the file.
+        """
+
+        # Initialize output buffer
+        out = ''
+
+        # Print specification
+        for key, value in self.specification.items():
+            out += f'{key} : {value}\n'
+
+        # Print the tour
+        if self.tour:
+            out += 'TOUR_SECTION\n'
+            for s in self.tour:
+                out += str(s) + '\n'
+            out += '-1\n'
+
+        # Append EOF
+        out += 'EOF\n'
+
+        # Write to file
+        with open(file, 'w') as f:
+            f.write(out)
+
+    def _parse(self):
+        """Iterates over lines and calls appropriate parses for each section
+        of the file.
+        """
+
+        self.specification = {}
+
+        while True:
+            try:
+                line = self._lines.current
+                if ':' in line:
+                    self.specification.update(self._parse_spec())
+                elif line.startswith('TOUR_SECTION'):
+                    next(self._lines)
+                    self.tour = self._parse_tour()
+                else:
+                    break
+            except StopIteration:
+                break
+
+        del self._lines
+
+        if 'TYPE' in self.specification and \
+                self.specification['TYPE'] != 'TOUR':
+            raise TypeError('Unsupported TSPLib file type. Only TOUR type \
+                            is supported')
+
+    def _parse_spec(self):
+        """Parses single line containing instance specification.
+
+        :return: Single parsed specification.
+        :rtype: dict
+        """
+
+        key, value = self._lines.current.split(':', 1)
+        key, value = key.strip(), value.strip()
+        value = int(value) if key in self._INT_PROPERTIES else value
+
+        try:
+            next(self._lines)
+        except StopIteration:
+            pass
+
+        return {key: value}
+
+    def _parse_tour(self):
+        """Parses TOUR_SECTION of the tour file.
+        """
+
+        tour = []
+
+        while True:
+            try:
+                s = int(self._lines.current)
+                if s == -1:
+                    return tour
+                tour.append(s)
+            except ValueError:
+                break
+
+            try:
+                next(self._lines)
+            except StopIteration:
+                break
+
+        return tour
