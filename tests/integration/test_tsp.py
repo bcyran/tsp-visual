@@ -64,3 +64,8 @@ class TestTSP(unittest.TestCase):
                 path = Path(path=p)
                 result = self.tsp.path_dist(path)
                 self.assertEqual(result, expected)
+
+    def test_load_opt(self):
+        self.tsp.load('tests/fixtures/bayg29.tsp')
+        self.assertIsNotNone(self.tsp.opt_tour)
+        self.assertIsNotNone(self.tsp.opt_path)

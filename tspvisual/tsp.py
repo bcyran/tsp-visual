@@ -1,8 +1,9 @@
+import os
 from enum import Enum
 from operator import itemgetter
 from random import shuffle
 
-from tspvisual.tsplib import TSPLib
+from tspvisual.tsplib import TSPLib, TSPLibTour
 
 
 class TSP:
@@ -18,6 +19,8 @@ class TSP:
         self.coords = []
         self.distances = []
         self.display = []
+        self.opt_tour = None
+        self.opt_path = None
 
         if file is not None:
             self.load(file)
@@ -45,6 +48,8 @@ class TSP:
             self._norm_display()
 
         del self._tsplib
+
+        self._load_opt_tour(file)
 
     @property
     def name(self):
@@ -84,6 +89,18 @@ class TSP:
         # Find maximum and normalize to [0, 1] values
         maximum = max(map(max, self.display))
         self.display = [(c[0] / maximum, c[1] / maximum) for c in self.display]
+
+    def _load_opt_tour(self, file):
+        """Loads optimal tour file (.opt.tour) if it's in the same directory as
+        the instance.
+
+        Also converts the TSPLibTour object to Path for easier use.
+        """
+
+        tour_filename = os.path.splitext(file)[0] + '.opt.tour'
+        if os.path.isfile(tour_filename):
+            self.opt_tour = TSPLibTour(tour_filename)
+            self.opt_path = Path.from_tour(self.opt_tour)
 
     def dist(self, i, j):
         """Returns the distance between two cities.
