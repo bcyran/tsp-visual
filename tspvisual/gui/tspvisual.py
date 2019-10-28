@@ -43,6 +43,12 @@ class TSPVisual(wx.Frame):
         data_menu = wx.Menu()
         export_data_mi = data_menu.Append(wx.ID_ANY, 'Export data',
                                           'Export current solver data.')
+        self.export_b_graph_mi = data_menu.Append(wx.ID_ANY,
+                                                  'Export best graph',
+                                                  'Export best graph.')
+        self.export_c_graph_mi = data_menu.Append(wx.ID_ANY,
+                                                  'Export current graph',
+                                                  'Export current graph.')
         help_menu = wx.Menu()
         about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program.')
         menu_bar.Append(file_menu, 'File')
@@ -80,6 +86,8 @@ class TSPVisual(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_close, close_mi)
         self.Bind(wx.EVT_MENU, lambda e: self.Close(), exit_mi)
         self.Bind(wx.EVT_MENU, self._on_data_export, export_data_mi)
+        self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_b_graph_mi)
+        self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_c_graph_mi)
         self.Bind(wx.EVT_MENU, self._on_about, about_mi)
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_end, 'SOLVER_STATE_END')
@@ -134,6 +142,28 @@ class TSPVisual(wx.Frame):
                               wx.ICON_INFORMATION | wx.OK)
             except Exception as e:
                 wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
+
+    def _on_graph_export(self, event):
+        """Handles graphs export.
+        """
+
+        # Show error and return if there is no results
+        if not self.results:
+            wx.MessageBox('No graphs to export.', 'Error',
+                          wx.ICON_ERROR | wx.OK)
+            return
+
+        if event.GetId() == self.export_b_graph_mi.GetId():
+            graph = self.solver_stats.best_canvas
+        elif event.GetId() == self.export_c_graph_mi.GetId():
+            graph = self.solver_stats.current_canvas
+
+        if graph.SaveFile():
+            wx.MessageBox('Graph exported successfully.', 'Success',
+                          wx.ICON_INFORMATION | wx.OK)
+        else:
+            wx.MessageBox('Error while exporting graph.', 'Error',
+                          wx.ICON_ERROR | wx.OK)
 
     def _on_about(self, event):
         """Shows about program box when.
