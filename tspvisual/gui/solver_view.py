@@ -104,28 +104,35 @@ class SolverControls(wx.Panel):
         solver_sizer.Add(self.delay, (3, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
         # Show best path checkbox
-        self.show_best = wx.CheckBox(solver_box, label='Show the best path')
+        self.show_best = wx.CheckBox(solver_box,
+                                     label='Show the best found path')
         self.show_best.SetValue(True)
         solver_sizer.Add(self.show_best, (4, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
         # Show current path checkbox
-        self.show_current = wx.CheckBox(solver_box, label='Show current path')
+        self.show_current = wx.CheckBox(solver_box,
+                                        label='Show current working path')
         self.show_current.SetValue(False)
         solver_sizer.Add(self.show_current, (5, 0), (1, 2),
+                         wx.EXPAND | borders('rl'), 10)
+        # Show optimal path checkbox
+        self.show_opt = wx.CheckBox(solver_box, label='Show optimal path')
+        self.show_opt.SetValue(True)
+        solver_sizer.Add(self.show_opt, (6, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
         # Solve button
         self.solve_button = wx.Button(solver_box,
                                       label=self.SOLVE_BTN_INACTIVE)
-        solver_sizer.Add(self.solve_button, (6, 0), (1, 1),
+        solver_sizer.Add(self.solve_button, (7, 0), (1, 1),
                          wx.EXPAND | borders('l'), 10)
         # Reset button
         self.reset_button = wx.Button(solver_box, label='Reset')
-        solver_sizer.Add(self.reset_button, (6, 1), (1, 1),
+        solver_sizer.Add(self.reset_button, (7, 1), (1, 1),
                          wx.EXPAND | borders('r'), 10)
         # Progress bar
         self.progress = wx.Gauge(solver_box, range=100)
         # self.progress.SetMaxSize((-1, 10))
-        solver_sizer.Add(self.progress, (7, 0), (1, 2),
+        solver_sizer.Add(self.progress, (8, 0), (1, 2),
                          wx.EXPAND | borders('rbl'), 10)
         solver_box_sizer.Add(solver_sizer)
 
@@ -133,11 +140,24 @@ class SolverControls(wx.Panel):
         # No idea why this panel and sizer are necessary but this was the only
         # way to avoid GTK warnings
         result_panel = wx.Panel(self)
-        result_sizer = wx.BoxSizer()
-        self.result = wx.StaticText(result_panel, label=self.DEFAULT_RESULT)
+        result_sizer = wx.GridBagSizer(10, 10)
         result_font = wx.Font(wx.FontInfo(16))
+        # Distance
+        result_label = wx.StaticText(result_panel, label='Distance:')
+        result_sizer.Add(result_label, (0, 0), (0, 1),
+                         wx.ALIGN_CENTER_VERTICAL | borders('tl'), 10)
+        self.result = wx.StaticText(result_panel, label=self.DEFAULT_RESULT)
         self.result.SetFont(result_font)
-        result_sizer.Add(self.result, 1, wx.ALL, 10)
+        result_sizer.Add(self.result, (0, 1), (0, 1),
+                         wx.ALIGN_CENTER_VERTICAL | borders('tr'), 10)
+        # Error
+        error_label = wx.StaticText(result_panel, label='Error:')
+        result_sizer.Add(error_label, (1, 0), (0, 1),
+                         wx.ALIGN_CENTER_VERTICAL | borders('bl'), 10)
+        self.error = wx.StaticText(result_panel, label=self.DEFAULT_RESULT)
+        self.error.SetFont(result_font)
+        result_sizer.Add(self.error, (1, 1), (0, 1),
+                         wx.ALIGN_CENTER_VERTICAL | borders('br'), 10)
         result_panel.SetSizer(result_sizer)
         res_box_sizer.Add(result_panel, 1)
 
@@ -152,8 +172,9 @@ class SolverControls(wx.Panel):
         self.solve_button.Bind(wx.EVT_BUTTON, self._on_solve)
         self.reset_button.Bind(wx.EVT_BUTTON, self._on_reset)
         self.delay.Bind(wx.EVT_SCROLL_CHANGED, self._on_delay_set)
-        self.show_best.Bind(wx.EVT_CHECKBOX, self._on_show_best)
-        self.show_current.Bind(wx.EVT_CHECKBOX, self._on_show_current)
+        self.show_best.Bind(wx.EVT_CHECKBOX, self._on_view_change)
+        self.show_current.Bind(wx.EVT_CHECKBOX, self._on_view_change)
+        self.show_opt.Bind(wx.EVT_CHECKBOX, self._on_view_change)
         pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_change, 'SOLVER_STATE_CHANGE')
@@ -217,20 +238,16 @@ class SolverControls(wx.Panel):
 
         self.runner.delay = self.delay.GetValue() / 1000
 
-    def _on_show_best(self, event):
-        """Handles checking or unchecking 'show best path' checkbox - sends
-        `VIEW_OPTION_CHANGE` pubsub message.
+    def _on_view_change(self, event):
+        """Handles checking or unchecking one of view option checkboxes.
         """
 
-        pub.sendMessage('VIEW_OPTION_CHANGE',
-                        show_best=self.show_best.GetValue())
+        options = {}
+        options['show_best'] = self.show_best.GetValue()
+        options['show_current'] = self.show_current.GetValue()
+        options['show_opt'] = self.show_opt.GetValue()
 
-    def _on_show_current(self, event):
-        """Handles checking or unchecking 'show current path' checkboc - sends
-        `VIEW_OPTION_CHANGE` pubsub message."""
-
-        pub.sendMessage('VIEW_OPTION_CHANGE',
-                        show_current=self.show_current.GetValue())
+        pub.sendMessage('VIEW_OPTION_CHANGE', **options)
 
     def _on_solver_change(self, solver):
         """Handles solver change event.
@@ -293,18 +310,20 @@ class TSPView(wx.Panel):
     CITY_COLOR = 'black'
     CURRENT_PATH_COLOR = 'black'
     BEST_PATH_COLOR = 'red'
+    OPT_PATH_COLOR = 'light gray'
 
     def __init__(self, parent):
         super(TSPView, self).__init__(parent)
 
         # Cities list
-        self._cities = []
+        self._tsp = None
         self._points = []
         # Solver state
         self._state = None
         # Whether to show the best path
         self.show_best = True
         self.show_current = False
+        self.show_opt = True
 
         # GUI
         self._init_ui()
@@ -343,12 +362,16 @@ class TSPView(wx.Panel):
         for c in self._points:
             dc.DrawCircle(c[0], c[1], self.CITY_RADIUS)
 
+        # Draw the optimal path
+        if self.show_opt and self._tsp.opt_path:
+            self._draw_path(dc, self._tsp.opt_path, self.OPT_PATH_COLOR)
+
         # End if there is no state
         if not self._state:
             return
 
         # Draw paths
-        if self._state.best and (self.show_best or self._state.final):
+        if self.show_best and (self._state.best or self._state.final):
             self._draw_path(dc, self._state.best, self.BEST_PATH_COLOR)
         if self._state.current and self.show_current:
             self._draw_path(dc, self._state.current, self.CURRENT_PATH_COLOR)
@@ -383,7 +406,7 @@ class TSPView(wx.Panel):
                           'Warning', wx.OK | wx.ICON_WARNING)
             return
 
-        self.set_cities(tsp.display)
+        self.tsp = tsp
 
     def _on_solver_state_change(self, state):
         """Handles solver state change event.
@@ -391,9 +414,10 @@ class TSPView(wx.Panel):
 
         self.set_state(state)
 
-    def _on_view_option_change(self, show_best=None, show_current=None):
+    def _on_view_option_change(self, show_best=None, show_current=None,
+                               show_opt=None):
         """Handles view option change - enables or disables displaying of the
-        best path.
+        best, current or optimal path.
         """
 
         if show_best is not None:
@@ -402,11 +426,24 @@ class TSPView(wx.Panel):
         if show_current is not None:
             self.show_current = show_current
 
-    def set_cities(self, cities):
-        """Sets cities list, triggers point calculation and repaint.
+        if show_best is not None:
+            self.show_opt = show_opt
+
+        self.Refresh()
+
+    @property
+    def tsp(self):
+        """Returns current tsp instance.
         """
 
-        self._cities = cities
+        return self._tsp
+
+    @tsp.setter
+    def tsp(self, tsp):
+        """Sets tsp instance, triggers point calculation and repaint.
+        """
+
+        self._tsp = tsp
         self.calculate_points()
         self.Refresh()
 
@@ -422,15 +459,17 @@ class TSPView(wx.Panel):
         """
 
         # Skip if no cities are set
-        if not self._cities:
+        if not self._tsp or not self._tsp.display:
             return
+
+        cities = self._tsp.display
 
         # Clear current points
         self._points.clear()
 
         # Find max x and y value
-        max_x = max(self._cities, key=itemgetter(0))[0]
-        max_y = max(self._cities, key=itemgetter(1))[1]
+        max_x = max(cities, key=itemgetter(0))[0]
+        max_y = max(cities, key=itemgetter(1))[1]
         # Drawing area size
         w, h = self.GetClientSize()
         # Usable area
@@ -443,7 +482,7 @@ class TSPView(wx.Panel):
         exp, eyp = ((w - side * max_x) / 2), ((h - side * max_y) / 2)
 
         # Calculate for all points
-        for c in self._cities:
+        for c in cities:
             # Note the inverted y axis
             x, y = (c[0] * side + exp),  (h - (c[1] * side + eyp))
             self._points.append((x, y))
