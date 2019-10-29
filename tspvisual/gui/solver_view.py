@@ -314,9 +314,9 @@ class TSPView(wx.Panel):
     PADDING = 20
     CITY_RADIUS = 2
     CITY_COLOR = 'black'
-    CURRENT_PATH_COLOR = 'black'
-    BEST_PATH_COLOR = 'red'
-    OPT_PATH_COLOR = 'light gray'
+    CURRENT_COLOR = 'black'
+    BEST_COLOR = 'red'
+    OPT_COLOR = 'light gray'
 
     def __init__(self, parent):
         super(TSPView, self).__init__(parent)
@@ -360,27 +360,32 @@ class TSPView(wx.Panel):
         if not self._points:
             return
 
-        # Define pen and brush
-        dc.SetPen(wx.Pen(self.CITY_COLOR))
-        dc.SetBrush(wx.Brush(self.CITY_COLOR))
-
-        # Draw cities
-        for c in self._points:
-            dc.DrawCircle(c[0], c[1], self.CITY_RADIUS)
-
         # Draw the optimal path
         if self.show_opt and self._tsp.opt_path:
-            self._draw_path(dc, self._tsp.opt_path, self.OPT_PATH_COLOR)
+            self._draw_path(dc, self._tsp.opt_path, self.OPT_COLOR)
 
-        # End if there is no state
-        if not self._state:
-            return
+        # Draw state if it's defined
+        if self._state:
+            # Draw current path if there's no best even if it's disabled
+            draw_current = (
+                self._state.current and
+                (self.show_current or not self._state.best)
+            )
+            draw_best = (
+                (self._state.best or self._state.final) and
+                self.show_best
+            )
+            # Draw paths
+            if draw_best:
+                self._draw_path(dc, self._state.best, self.BEST_COLOR)
+            if draw_current:
+                self._draw_path(dc, self._state.current, self.CURRENT_COLOR)
 
-        # Draw paths
-        if self.show_best and (self._state.best or self._state.final):
-            self._draw_path(dc, self._state.best, self.BEST_PATH_COLOR)
-        if self._state.current and self.show_current:
-            self._draw_path(dc, self._state.current, self.CURRENT_PATH_COLOR)
+        # Draw cities
+        dc.SetPen(wx.Pen(self.CITY_COLOR))
+        dc.SetBrush(wx.Brush(self.CITY_COLOR))
+        for c in self._points:
+            dc.DrawCircle(c[0], c[1], self.CITY_RADIUS)
 
     def _draw_path(self, dc, path, color):
         """Utility method to draw a path on the given device context.
