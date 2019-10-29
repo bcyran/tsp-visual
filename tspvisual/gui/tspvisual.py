@@ -17,7 +17,7 @@ class TSPVisual(wx.Frame):
 
     DEFAULT_TITLE = 'No instance loaded'
 
-    def __init__(self):
+    def __init__(self, file=None):
         super(TSPVisual, self).__init__(None, title='TSP Visual')
 
         # Solver results (for exporting)
@@ -28,6 +28,10 @@ class TSPVisual(wx.Frame):
         self.Show()
         self.SetSize(1200, 900)
         self.Centre()
+
+        # Try to open TSP file if it's given
+        if file:
+            self.load_file(file)
 
     def _init_ui(self):
         """Builds GUI.
@@ -92,6 +96,17 @@ class TSPVisual(wx.Frame):
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_end, 'SOLVER_STATE_END')
 
+    def load_file(self, file):
+        """Tries to load specified TSP instance and sends message on success.
+        Shows error dialog on fail.
+        """
+
+        try:
+            tsp = TSP(file)
+            pub.sendMessage('TSP_CHANGE', tsp=tsp)
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
+
     def _on_open(self, event):
         """Handles file opening.
         """
@@ -105,12 +120,7 @@ class TSPVisual(wx.Frame):
                 return
 
             file = file_dialog.GetPath()
-
-            try:
-                tsp = TSP(file)
-                pub.sendMessage('TSP_CHANGE', tsp=tsp)
-            except Exception as e:
-                wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
+            self.load_file(file)
 
     def _on_close(self, event):
         """Handles file closing.
