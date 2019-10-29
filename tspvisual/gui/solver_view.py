@@ -225,6 +225,7 @@ class SolverControls(wx.Panel):
         """
 
         self.result.SetLabel(self.DEFAULT_RESULT)
+        self.error.SetLabel(self.DEFAULT_RESULT)
         self.progress.SetValue(0)
         pub.sendMessage('SOLVER_STATE_CHANGE', state=None)
 
@@ -277,6 +278,11 @@ class SolverControls(wx.Panel):
         if state.best:
             result = state.best.distance
             self.result.SetLabel(str(result))
+
+            if self.tsp.opt_path:
+                opt = self.tsp.opt_path.distance
+                error = round((result - opt) / opt * 100, 2)
+                self.error.SetLabel(str(error) + '%')
 
         # If this is final result
         if state.final:
