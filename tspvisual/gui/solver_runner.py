@@ -36,6 +36,8 @@ class SolverRunner(threading.Thread):
 
         # Delay between messages to GUI
         self.delay = 0
+        # How many messages per second can be sent to GUI
+        self.message_limit = 60
 
     def run(self):
         """Creates a process wich runs the solver.
@@ -46,13 +48,22 @@ class SolverRunner(threading.Thread):
             self._solver, self._tsp, self._queue)
         self.solver_process.start()
 
+        # Mesage can be sent after this interval from sending the previous one
+        message_interval = 1 / self.message_limit
+        # Timestamp after which next message can be sent
+        next_message_time = time.time()
+
         # Start reading SolverState objects from the queue
         while not self._stop_event.is_set():
             state = self._queue.get()
             self.results.append(state)
 
-            # Send message with the new state to GUI
-            wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_CHANGE', state=state)
+            if time.time() > next_message_time:
+                # Send message with the new state to GUI
+                wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_CHANGE',
+                             state=state)
+                # Calculate when next message can be sent
+                next_message_time = time.time() + message_interval
 
             # Break out of the loop if it's the final state
             if state.final:
@@ -61,6 +72,8 @@ class SolverRunner(threading.Thread):
             # Sleep specified amount of itme
             time.sleep(self.delay)
 
+        # Always send the final state
+        wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_CHANGE', state=state)
         # Send information that solving has ended
         wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_END', results=self.results)
 
