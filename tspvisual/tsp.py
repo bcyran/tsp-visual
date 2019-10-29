@@ -101,6 +101,7 @@ class TSP:
         if os.path.isfile(tour_filename):
             self.opt_tour = TSPLibTour(tour_filename)
             self.opt_path = Path.from_tour(self.opt_tour)
+            self.opt_path.distance = self.path_dist(self.opt_path)
 
     def dist(self, i, j):
         """Returns the distance between two cities.
