@@ -5,7 +5,8 @@ from tspvisual.gui.helpers import borders
 
 
 class TSPInfo(wx.Panel):
-    """Displays specification of the TSP instance.
+    """Displays specification of the TSP instance and its optimal tour if it's
+    available.
     """
 
     def __init__(self, parent):
@@ -18,27 +19,28 @@ class TSPInfo(wx.Panel):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # TSP specification label
-        tsp_label = wx.StaticText(self, label='TSP instance')
-        sizer.Add(tsp_label, 0, wx.EXPAND | borders('tlr'), 10)
+        # TSP info box
+        tsp_box = wx.StaticBox(self, label='TSP instance')
+        tsp_box_sizer = wx.StaticBoxSizer(tsp_box, wx.VERTICAL)
+        sizer.Add(tsp_box_sizer, 1, wx.EXPAND | wx.ALL, 10)
+        # Tour info box
+        tour_box = wx.StaticBox(self, label='Optimal tour')
+        tour_box_sizer = wx.StaticBoxSizer(tour_box, wx.VERTICAL)
+        sizer.Add(tour_box_sizer, 1, wx.EXPAND | borders('lrb'), 10)
+
         # TSP specification table
-        self.tsp_table = wx.ListCtrl(self, style=wx.LC_REPORT)
+        self.tsp_table = wx.ListCtrl(tsp_box, style=wx.LC_REPORT)
+        self.tsp_table.SetMinSize((1, 1))  # To avoid GTK errors
         self.tsp_table.InsertColumn(0, 'Key')
         self.tsp_table.InsertColumn(1, 'Value')
-        sizer.Add(self.tsp_table, 1, wx.EXPAND | borders('lr'), 10)
+        tsp_box_sizer.Add(self.tsp_table, 1, wx.EXPAND | borders('lr'), 10)
 
-        # Separator line
-        separator = wx.StaticLine(self)
-        sizer.Add(separator, 0, wx.EXPAND | borders('trbl'), 10)
-
-        # Tour specification label
-        tour_label = wx.StaticText(self, label='Optimal tour')
-        sizer.Add(tour_label, 0, wx.EXPAND | borders('lr'), 10)
         # Tour specification table
-        self.tour_table = wx.ListCtrl(self, style=wx.LC_REPORT)
+        self.tour_table = wx.ListCtrl(tour_box, style=wx.LC_REPORT)
+        self.tour_table.SetMinSize((1, 1))  # To avoid GTK errors
         self.tour_table.InsertColumn(0, 'Key')
         self.tour_table.InsertColumn(1, 'Key')
-        sizer.Add(self.tour_table, 1, wx.EXPAND | borders('lr'), 10)
+        tour_box_sizer.Add(self.tour_table, 1, wx.EXPAND | borders('lr'), 10)
 
         self.SetSizer(sizer)
 
