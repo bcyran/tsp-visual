@@ -3,7 +3,7 @@ import wx.adv
 import wx.lib.inspection
 from pubsub import pub
 
-from tspvisual.gui.export import export_results
+from tspvisual.gui.export import export_results, export_tour
 from tspvisual.gui.helpers import borders
 from tspvisual.gui.solver_stats import SolverStats
 from tspvisual.gui.solver_view import SolverView
@@ -21,7 +21,9 @@ class TSPVisual(wx.Frame):
         super(TSPVisual, self).__init__(None, title='TSP Visual')
 
         # Solver results (for exporting)
-        self.results = None
+        self._results = None
+        # Current TSP instance
+        self._tsp = None
 
         # GUI
         self._init_ui()
@@ -45,14 +47,15 @@ class TSPVisual(wx.Frame):
         file_menu.AppendSeparator()
         exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application.')
         data_menu = wx.Menu()
-        export_data_mi = data_menu.Append(wx.ID_ANY, 'Export data',
-                                          'Export current solver data.')
-        self.export_b_graph_mi = data_menu.Append(wx.ID_ANY,
-                                                  'Export best graph',
-                                                  'Export best graph.')
-        self.export_c_graph_mi = data_menu.Append(wx.ID_ANY,
-                                                  'Export current graph',
-                                                  'Export current graph.')
+        export_data_mi = data_menu.Append(
+            wx.ID_ANY, 'Export data', 'Export current solver data.')
+        self.export_b_graph_mi = data_menu.Append(
+            wx.ID_ANY, 'Export best graph', 'Export best graph.')
+        self.export_c_graph_mi = data_menu.Append(
+            wx.ID_ANY, 'Export current graph', 'Export current graph.')
+        self.export_tour = data_menu.Append(
+            wx.ID_ANY, 'Export tour',
+            'Export the best tour found during the last solver run.')
         help_menu = wx.Menu()
         about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program.')
         menu_bar.Append(file_menu, 'File')
@@ -92,6 +95,7 @@ class TSPVisual(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_data_export, export_data_mi)
         self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_b_graph_mi)
         self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_c_graph_mi)
+        self.Bind(wx.EVT_MENU, self._on_tour_export, self.export_tour)
         self.Bind(wx.EVT_MENU, self._on_about, about_mi)
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_end, 'SOLVER_STATE_END')
@@ -133,7 +137,7 @@ class TSPVisual(wx.Frame):
         """
 
         # Show error and return if there is no results
-        if not self.results:
+        if not self._results:
             wx.MessageBox('No data to export.', 'Error', wx.ICON_ERROR | wx.OK)
             return
 
@@ -147,7 +151,7 @@ class TSPVisual(wx.Frame):
 
             file = file_dialog.GetPath()
             try:
-                export_results(file, self.results)
+                export_results(file, self._results)
                 wx.MessageBox('Data exported successfully.', 'Success',
                               wx.ICON_INFORMATION | wx.OK)
             except Exception as e:
@@ -158,7 +162,7 @@ class TSPVisual(wx.Frame):
         """
 
         # Show error and return if there is no results
-        if not self.results:
+        if not self._results:
             wx.MessageBox('No graphs to export.', 'Error',
                           wx.ICON_ERROR | wx.OK)
             return
@@ -174,6 +178,31 @@ class TSPVisual(wx.Frame):
         else:
             wx.MessageBox('Error while exporting graph.', 'Error',
                           wx.ICON_ERROR | wx.OK)
+
+    def _on_tour_export(self, event):
+        """Handles tour export.
+        """
+
+        # Show error and return if there is no results
+        if not self._results:
+            wx.MessageBox('No tour to export.', 'Error', wx.ICON_ERROR | wx.OK)
+            return
+
+        # Present file picker and try to load selected instance
+        with (wx.FileDialog(self, 'Save tour file.',
+              wildcard='Tour files (*.tour)|*.tour',
+              style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)) as file_dialog:
+
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return
+
+            file = file_dialog.GetPath()
+            try:
+                export_tour(file, self._results[-1].best, self._tsp)
+                wx.MessageBox('Tour exported successfully.', 'Success',
+                              wx.ICON_INFORMATION | wx.OK)
+            except Exception as e:
+                wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
 
     def _on_about(self, event):
         """Shows about program box when.
@@ -201,8 +230,10 @@ class TSPVisual(wx.Frame):
         """
 
         if not tsp:
+            self._tsp = None
             self.title.SetLabel(self.DEFAULT_TITLE)
         else:
+            self._tsp = tsp
             self.title.SetLabel(f'Instance: {tsp.name}')
 
     def _on_solver_state_end(self, results):
@@ -210,4 +241,4 @@ class TSPVisual(wx.Frame):
         future exporting.
         """
 
-        self.results = results
+        self._results = results

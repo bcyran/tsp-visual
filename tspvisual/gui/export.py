@@ -1,4 +1,7 @@
 import csv
+import os
+
+from tspvisual.tsplib import TSPLibTour
 
 
 def export_results(file, results):
@@ -20,3 +23,20 @@ def export_results(file, results):
                              best_distance,
                              r.current.path if r.current else '',
                              current_distance))
+
+
+def export_tour(file, path, tsp):
+    """Exports given path to TSPLIB .tour file.
+
+    :param str file: Destination file.
+    :param Path path: Path to export.
+    :param TSP tsp: TSP instance in which exported Path is found.
+    """
+
+    tour = TSPLibTour.from_path(path)
+    tour.specification['TYPE'] = 'TOUR'
+    tour.specification['DIMENSION'] = tsp.specification['DIMENSION']
+    tour.specification['COMMENT'] = 'Path in {} instance.'\
+        .format(tsp.specification['NAME'])
+    tour.specification['NAME'] = os.path.basename(file)
+    tour.write(file)
