@@ -31,6 +31,7 @@ class SolverStats(wx.Panel):
         self.SetSizer(sizer)
 
         pub.subscribe(self._on_solver_state_end, 'SOLVER_STATE_END')
+        pub.subscribe(self._on_solver_state_reset, 'SOLVER_STATE_RESET')
 
     def _plot(self):
         """Plots best and current paths data.
@@ -63,9 +64,22 @@ class SolverStats(wx.Panel):
         self.best_canvas.Draw(best_plot)
         self.current_canvas.Draw(current_plot)
 
+    def reset(self):
+        """Resets this control to its initial state.
+        """
+
+        self.results = []
+        self._plot()
+
     def _on_solver_state_end(self, results):
         """Handles end of solving message.
         """
 
         self.results = results
         self._plot()
+
+    def _on_solver_state_reset(self):
+        """Handles SOLVER_STATE_RESET message.
+        """
+
+        self.reset()

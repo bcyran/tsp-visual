@@ -99,6 +99,7 @@ class TSPVisual(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_about, about_mi)
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_end, 'SOLVER_STATE_END')
+        pub.subscribe(self._on_solver_state_reset, 'SOLVER_STATE_RESET')
 
     def load_file(self, file):
         """Tries to load specified TSP instance and sends message on success.
@@ -108,6 +109,7 @@ class TSPVisual(wx.Frame):
         try:
             tsp = TSP(file)
             pub.sendMessage('TSP_CHANGE', tsp=tsp)
+            pub.sendMessage('SOLVER_STATE_RESET')
         except Exception as e:
             wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
 
@@ -131,6 +133,7 @@ class TSPVisual(wx.Frame):
         """
 
         pub.sendMessage('TSP_CHANGE', tsp=None)
+        pub.sendMessage('SOLVER_STATE_RESET')
 
     def _on_data_export(self, event):
         """Handles data export.
@@ -242,3 +245,9 @@ class TSPVisual(wx.Frame):
         """
 
         self._results = results
+
+    def _on_solver_state_reset(self):
+        """Handles SOLVER_STATE_RESET message.
+        """
+
+        self._results = None

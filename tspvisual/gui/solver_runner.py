@@ -39,6 +39,9 @@ class SolverRunner(threading.Thread):
         # How many messages per second can be sent to GUI
         self.message_limit = 60
 
+        # Reset message subscribtion
+        pub.subscribe(self._on_solver_state_reset, 'SOLVER_STATE_RESET')
+
     def run(self):
         """Creates a process wich runs the solver.
         """
@@ -86,6 +89,12 @@ class SolverRunner(threading.Thread):
 
         self._stop_event.set()
         self.solver_process.stop()
+
+    def _on_solver_state_reset(self):
+        """Handles solver state reset.
+        """
+
+        self.results = []
 
 
 class SolverProcess(multiprocessing.Process):

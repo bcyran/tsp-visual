@@ -178,6 +178,7 @@ class SolverControls(wx.Panel):
         pub.subscribe(self._on_solver_change, 'SOLVER_CHANGE')
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
         pub.subscribe(self._on_solver_state_change, 'SOLVER_STATE_CHANGE')
+        pub.subscribe(self._on_solver_state_reset, 'SOLVER_STATE_RESET')
 
         # Run solver selection event handler to create default solver
         self._on_select(None)
@@ -221,13 +222,11 @@ class SolverControls(wx.Panel):
             self._set_running(False)
 
     def _on_reset(self, event):
-        """Handles clicking 'reset' button - clears displayed result.
+        """Handles clicking 'reset' button - sends reset message.
         """
 
-        self.result.SetLabel(self.DEFAULT_RESULT)
-        self.error.SetLabel(self.DEFAULT_RESULT)
-        self.progress.SetValue(0)
         pub.sendMessage('SOLVER_STATE_CHANGE', state=None)
+        pub.sendMessage('SOLVER_STATE_RESET')
 
     def _on_delay_set(self, event):
         """Handles setting 'delay' slider - if there is an active runner its
@@ -288,6 +287,15 @@ class SolverControls(wx.Panel):
         if state.final:
             # Set state to not running
             self._set_running(False)
+
+    def _on_solver_state_reset(self):
+        """Handles solver state reset message - clears result, error and
+        progress controls.
+        """
+
+        self.result.SetLabel(self.DEFAULT_RESULT)
+        self.error.SetLabel(self.DEFAULT_RESULT)
+        self.progress.SetValue(0)
 
     def _set_running(self, state):
         """Adjusts the UI to the current state of the solver runner.
