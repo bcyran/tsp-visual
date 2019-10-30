@@ -45,14 +45,16 @@ class SolverStats(wx.Panel):
             self.current_canvas.xSpec = (0, x_max)
 
         best_points = [(r.time, r.best.distance) for r in self.results
-                       if r.best is not None]
+                       if r.best is not None and
+                       isinstance(r.best.distance, int)]
         best_line = PolyLine(best_points)
         best_plot = PlotGraphics([best_line],
                                  title='Best path distance over time',
                                  xLabel='Time [ns]', yLabel='Distance')
 
         current_points = [(r.time, r.current.distance) for r in self.results
-                          if r.current is not None]
+                          if r.current is not None and
+                          isinstance(r.best.distance, int)]
         current_line = PolyLine(current_points)
         current_plot = PlotGraphics([current_line],
                                     title='Current path distance over time',
