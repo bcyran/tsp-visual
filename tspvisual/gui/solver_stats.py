@@ -55,7 +55,7 @@ class SolverStats(wx.Panel):
 
         current_points = [(r.time, r.current.distance) for r in self.results
                           if r.current is not None and
-                          isinstance(r.best.distance, int)]
+                          isinstance(r.current.distance, int)]
         current_line = PolyLine(current_points)
         current_plot = PlotGraphics([current_line],
                                     title='Current path distance over time',
