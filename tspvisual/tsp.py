@@ -130,6 +130,10 @@ class TSP:
         return total
 
 
+# Available path neighbourhood types
+Neighbourhood = Enum('Neighbourhood', 'SWAP INSERT INVERT')
+
+
 class Path:
     """Representation of a path in TSP.
 
@@ -139,9 +143,6 @@ class Path:
     Cities at specified stops can be accessed like in list since __setitem__
     and __getitem__ are implemented.
     """
-
-    # Available path neighbourhood types
-    Neighbourhood = Enum('Neighbourhood', 'SWAP INSERT INVERT')
 
     def __init__(self, length=0, path=None):
         self._path = [-1] * length if path is None else path
@@ -257,9 +258,9 @@ class Path:
         """
 
         moves = {
-            self.Neighbourhood.SWAP: self.swap,
-            self.Neighbourhood.INSERT: self.insert,
-            self.Neighbourhood.INVERT: self.invert
+            Neighbourhood.SWAP: self.swap,
+            Neighbourhood.INSERT: self.insert,
+            Neighbourhood.INVERT: self.invert
         }
 
         moves[neigh](i, j)

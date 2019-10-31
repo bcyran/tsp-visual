@@ -4,7 +4,7 @@ from enum import Enum
 from random import randint, random
 
 from tspvisual.solver import Property, Solver, SolverState
-from tspvisual.tsp import TSP, Path
+from tspvisual.tsp import TSP, Neighbourhood, Path
 
 
 class GASolver(Solver):
@@ -21,7 +21,7 @@ class GASolver(Solver):
         Property('Generations', 'generations', int, 2000),
         Property('Run time [ms]', 'run_time', int, 0),
         Property('Crossover type', 'crossover_type', Crossover, 'NWOX'),
-        Property('Mutation type', 'mutation_type', Path.Neighbourhood,
+        Property('Mutation type', 'mutation_type', Neighbourhood,
                  'INVERT')
     ]
 
@@ -33,7 +33,7 @@ class GASolver(Solver):
         self.generations = 2000
         self.run_time = 0
         self.crossover_type = self.Crossover.NWOX
-        self.mutation_type = Path.Neighbourhood.INVERT
+        self.mutation_type = Neighbourhood.INVERT
         self._population = []
         self._mating_pool = []
 

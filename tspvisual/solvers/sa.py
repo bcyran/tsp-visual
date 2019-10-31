@@ -3,7 +3,7 @@ from math import exp, log
 from random import randint, random
 
 from tspvisual.solver import Property, Solver, SolverState
-from tspvisual.tsp import TSP, Path
+from tspvisual.tsp import TSP, Neighbourhood, Path
 
 
 class SASolver(Solver):
@@ -15,8 +15,7 @@ class SASolver(Solver):
         Property('Initial temperature', 'init_temp', float, 100),
         Property('End temperature', 'end_temp', float, 0.1),
         Property('Cooling rate', 'cooling_rate', float, 0.01),
-        Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
-                 'INVERT'),
+        Property('Neighbourhood', 'neighbourhood', Neighbourhood, 'INVERT'),
         Property('Run time [ms]', 'run_time', int, 0)
     ]
 
@@ -25,7 +24,7 @@ class SASolver(Solver):
         self.init_temp = 100
         self.end_temp = 0.1
         self.cooling_rate = 0.01
-        self.neighbourhood = Path.Neighbourhood.INVERT
+        self.neighbourhood = Neighbourhood.INVERT
         self.run_time = 0
 
     def solve(self, tsp, steps=True):

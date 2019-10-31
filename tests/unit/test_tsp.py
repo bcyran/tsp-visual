@@ -2,8 +2,8 @@ import unittest
 from copy import deepcopy
 from unittest.mock import patch
 
-from tspvisual.tsp import TSP, Path, TSPLib
-from tspvisual.tsplib import TSPLibTour
+from tspvisual.tsp import TSP, Neighbourhood, Path
+from tspvisual.tsplib import TSPLib, TSPLibTour
 
 
 class TestPath(unittest.TestCase):
@@ -218,9 +218,9 @@ class TestPath(unittest.TestCase):
 
     def test_move(self):
         data = [
-            (Path.Neighbourhood.SWAP, 1, 4, [1, 5, 3, 4, 2, 6]),
-            (Path.Neighbourhood.INSERT, 1, 4, [1, 3, 4, 2, 5, 6]),
-            (Path.Neighbourhood.INVERT, 1, 4, [1, 5, 2, 4, 3, 6])
+            (Neighbourhood.SWAP, 1, 4, [1, 5, 3, 4, 2, 6]),
+            (Neighbourhood.INSERT, 1, 4, [1, 3, 4, 2, 5, 6]),
+            (Neighbourhood.INVERT, 1, 4, [1, 5, 2, 4, 3, 6])
         ]
 
         path = Path(path=[1, 2, 3, 4, 5, 6])

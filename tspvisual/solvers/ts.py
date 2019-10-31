@@ -4,7 +4,7 @@ from math import inf
 
 from tspvisual.solver import Property, Solver, SolverState
 from tspvisual.solvers.greedy import GreedySolver
-from tspvisual.tsp import TSP, Path
+from tspvisual.tsp import TSP, Neighbourhood, Path
 
 
 class TSSolver(Solver):
@@ -15,7 +15,7 @@ class TSSolver(Solver):
     properties = [
         Property('Iterations', 'iterations', int, 1000),
         Property('Cadence', 'cadence', int, 18),
-        Property('Neighbourhood', 'neighbourhood', Path.Neighbourhood,
+        Property('Neighbourhood', 'neighbourhood', Neighbourhood,
                  'INVERT'),
         Property('Reset threshold', 'reset_threshold', int, 45),
         Property('Stop threshold', 'stop_threshold', int, 450),
@@ -109,11 +109,11 @@ class TSSolver(Solver):
         # Iterate through all possible 2-city moves
         for i, j in product(range(1, self.tsp.dimension), repeat=2):
             # Skip redundant moves
-            if self.neighbourhood == path.Neighbourhood.SWAP or \
-                    self.neighbourhood == path.Neighbourhood.INVERT:
+            if self.neighbourhood == Neighbourhood.SWAP or \
+                    self.neighbourhood == Neighbourhood.INVERT:
                 if j <= i:
                     continue
-            if self.neighbourhood == path.Neighbourhood.INSERT:
+            if self.neighbourhood == Neighbourhood.INSERT:
                 if j == i + 1 or j == i - 1:
                     continue
 
