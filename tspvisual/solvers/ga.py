@@ -309,12 +309,3 @@ class GASolver(Solver):
             j = randint(1, self.tsp.dimension - 1)
 
         return min(i, j), max(i, j)
-
-    def _millis(self):
-        """Returns current timestamp in milliseconds.
-
-        :return: Time since epoch in milliseconds.
-        :rtype: int
-        """
-
-        return int(round(time.time() * 1000))
