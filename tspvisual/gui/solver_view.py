@@ -212,6 +212,7 @@ class SolverControls(wx.Panel):
             # Create and start the solver runner
             self.runner = SolverRunner(self.solver, self.tsp)
             self.runner.delay = self.delay.GetValue() / 1000
+            self.runner.daemon = True
             self.runner.start()
             # Set state to running
             self._set_running(True)

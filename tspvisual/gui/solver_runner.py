@@ -49,6 +49,7 @@ class SolverRunner(threading.Thread):
         # Start solver process
         self.solver_process = SolverProcess(
             self._solver, self._tsp, self._queue)
+        self.solver_process.daemon = True
         self.solver_process.start()
 
         # Mesage can be sent after this interval from sending the previous one
@@ -80,6 +81,13 @@ class SolverRunner(threading.Thread):
         # Send information that solving has ended
         wx.CallAfter(pub.sendMessage, 'SOLVER_STATE_END', results=self.results)
 
+        # Make sure the queue is empty
+        while not self._queue.empty():
+            self._queue.get_nowait()
+
+        # This is necessary only Windows, worked fine on Linux
+        self.solver_process.terminate()
+
         # Wait for the solver process
         self.solver_process.join()
 
@@ -87,8 +95,8 @@ class SolverRunner(threading.Thread):
         """Terminates the solver process.
         """
 
-        self._stop_event.set()
         self.solver_process.stop()
+        self._stop_event.set()
 
     def _on_solver_state_reset(self):
         """Handles solver state reset.
@@ -122,6 +130,8 @@ class SolverProcess(multiprocessing.Process):
 
             if self._stop_event.is_set():
                 break
+
+        self._queue.close()
 
     def stop(self):
         """Sets the stop event.
