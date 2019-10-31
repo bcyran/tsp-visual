@@ -544,7 +544,8 @@ class SolverProperties(wx.propgrid.PropertyGrid):
         """
 
         for prop in self.Properties:
-            solver_prop = prop.GetAttribute('solver_property')
+            prop_idx = prop.GetAttribute('property_idx')
+            solver_prop = self.solver.properties[prop_idx]
             value = solver_prop.type(prop.GetValue())
             setattr(self.solver, solver_prop.field, value)
 
@@ -571,7 +572,7 @@ class SolverProperties(wx.propgrid.PropertyGrid):
             return
 
         # For each property
-        for p in self.solver.properties:
+        for i, p in enumerate(self.solver.properties):
             # Create property object with appropriate type
             if p.type is int:
                 prop = wxpg.IntProperty()
@@ -588,7 +589,7 @@ class SolverProperties(wx.propgrid.PropertyGrid):
             prop.SetLabel(p.name)
             prop.SetValue(p.default)
             prop.SetDefaultValue(p.default)
-            prop.SetAttribute('solver_property', p)
+            prop.SetAttribute('property_idx', i)
 
             # And append the property object
             self.Append(prop)
