@@ -70,13 +70,13 @@ class Solver(abc.ABC):
         """Stores current time for further calculations of run time.
         """
 
-        self._start_time = time.time_ns()
+        self._start_time = time.perf_counter_ns()
 
     def _time(self):
         """Calculates time elapsed since calling `_start_timer`.
         """
 
-        return time.time_ns() - self._start_time
+        return time.perf_counter_ns() - self._start_time
 
     def _time_ms(self):
         """Returns time elapsed since calling `_start_timer` in milliseconds.
