@@ -6,12 +6,12 @@ from random import randint, random
 from tspvisual.solver import Property, Solver, SolverState
 from tspvisual.tsp import TSP, Neighbourhood, Path
 
+Crossover = Enum('Crossover', 'OX PMX NWOX')
+
 
 class GASolver(Solver):
     """Genetic Algorithm solver for TSP.
     """
-
-    Crossover = Enum('Crossover', 'OX PMX NWOX')
 
     name = 'Genetic Algorithm'
     properties = [
@@ -32,7 +32,7 @@ class GASolver(Solver):
         self.mutation_rate = 0.05
         self.generations = 2000
         self.run_time = 0
-        self.crossover_type = self.Crossover.NWOX
+        self.crossover_type = Crossover.NWOX
         self.mutation_type = Neighbourhood.INVERT
         self._population = []
         self._mating_pool = []
@@ -141,9 +141,9 @@ class GASolver(Solver):
         """
 
         crossovers = {
-            self.Crossover.OX: self._crossover_ox,
-            self.Crossover.PMX: self._crossover_pmx,
-            self.Crossover.NWOX: self._crossover_nwox
+            Crossover.OX: self._crossover_ox,
+            Crossover.PMX: self._crossover_pmx,
+            Crossover.NWOX: self._crossover_nwox
         }
 
         return crossovers[self.crossover_type](parent1, parent2)
