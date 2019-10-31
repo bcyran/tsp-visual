@@ -15,8 +15,7 @@ class TSSolver(Solver):
     properties = [
         Property('Iterations', 'iterations', int, 1000),
         Property('Cadence', 'cadence', int, 18),
-        Property('Neighbourhood', 'neighbourhood', Neighbourhood,
-                 'INVERT'),
+        Property('Neighbourhood', 'neighbourhood', Neighbourhood, 'INVERT'),
         Property('Reset threshold', 'reset_threshold', int, 45),
         Property('Stop threshold', 'stop_threshold', int, 450),
         Property('Run time', 'run_time', int, 0)
@@ -26,7 +25,7 @@ class TSSolver(Solver):
         super().__init__()
         self.iterations = 1000
         self.cadence = 18
-        self.neighbourhood = Path.Neighbourhood.INVERT
+        self.neighbourhood = Neighbourhood.INVERT
         self.reset_threshold = 45
         self.stop_threshold = 450
         self.run_time = 0
