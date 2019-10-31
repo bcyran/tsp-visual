@@ -56,16 +56,15 @@ class BnBSolver(Solver):
 
             # If it's the last level of the tree
             if level == self.tsp.dimension - 1:
+                path.distance = dist + self.tsp.dist(city, 0)
                 # Yield the current state
                 if steps:
                     yield SolverState(self._time(), current / total,
                                       deepcopy(path), deepcopy(min_path))
                 # Distance of full path with return to 0
-                new_dist = dist + self.tsp.dist(city, 0)
                 # Keep it if it's better than the current minimum
-                if new_dist < min_path.distance:
+                if path.distance < min_path.distance:
                     min_path = deepcopy(path)
-                    min_path.distance = new_dist
                 else:
                     continue
 
