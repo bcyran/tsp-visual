@@ -1,4 +1,4 @@
-import filecmp
+import os
 import unittest
 from tempfile import NamedTemporaryFile
 
@@ -133,11 +133,28 @@ class TestTSPLibTour(unittest.TestCase):
             self.tsplibtour.load('tests/fixtures/bayg29.tsp')
 
     def test_write(self):
-        with NamedTemporaryFile() as result_file:
-            self.tsplibtour = TSPLibTour()
-            self.tsplibtour.specification = self.expected_spec
-            self.tsplibtour.tour = self.expected_tour
-            self.tsplibtour.write(result_file.name)
-            result = filecmp.cmp(result_file.name,
-                                 'tests/fixtures/bayg29.opt.tour')
-            self.assertTrue(result)
+        tmp = NamedTemporaryFile(delete=False, mode='w')
+        tmp.close()
+        self.tsplibtour = TSPLibTour()
+        self.tsplibtour.specification = self.expected_spec
+        self.tsplibtour.tour = self.expected_tour
+        self.tsplibtour.write(tmp.name)
+        result = self._cmp_files(tmp.name, 'tests/fixtures/bayg29.opt.tour')
+        self.assertTrue(result)
+        os.unlink(tmp.name)
+
+    @staticmethod
+    def _cmp_files(file1, file2):
+        """Compare files ignoring differences in newline character.
+
+        Used for the same result between OS'es.
+        """
+
+        l1 = l2 = True
+        with open(file1, 'r') as f1, open(file2, 'r') as f2:
+            while l1 and l2:
+                l1 = f1.readline()
+                l2 = f2.readline()
+                if l1 != l2:
+                    return False
+        return True
