@@ -1,4 +1,5 @@
 import argparse
+from multiprocessing import freeze_support
 
 import wx
 
@@ -24,4 +25,5 @@ def main():
 
 
 if __name__ == '__main__':
+    freeze_support()
     main()
