@@ -113,7 +113,7 @@ class TSSolver(Solver):
                 if j <= i:
                     continue
             if self.neighbourhood == Neighbourhood.INSERT:
-                if j == i + 1 or j == i - 1:
+                if abs(i - j) == 1 and i > j:
                     continue
 
             # Skip tabu moves
