@@ -114,7 +114,7 @@ class SolverControls(wx.Panel):
         # Show current path checkbox
         self.show_current = wx.CheckBox(solver_box,
                                         label='Show current working path')
-        self.show_current.SetValue(False)
+        self.show_current.SetValue(True)
         solver_sizer.Add(self.show_current, (5, 0), (1, 2),
                          wx.EXPAND | borders('rl'), 10)
         # Show optimal path checkbox
@@ -339,7 +339,7 @@ class TSPView(wx.Panel):
         self._state = None
         # Whether to show the best path
         self.show_best = True
-        self.show_current = False
+        self.show_current = True
         self.show_opt = True
 
         # GUI
