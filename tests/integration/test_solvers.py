@@ -2,7 +2,6 @@ import unittest
 
 from tspvisual.solvers.bf import BFSolver
 from tspvisual.solvers.bnb import BnBSolver
-from tspvisual.solvers.dp import DPSolver
 from tspvisual.solvers.greedy import GreedySolver
 
 
