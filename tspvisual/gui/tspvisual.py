@@ -218,7 +218,7 @@ class TSPVisual(wx.Frame):
 
         about = wx.adv.AboutDialogInfo()
         about.SetName('TSP Visual')
-        about.SetVersion('0.1')
+        about.SetVersion('0.1.0')
         about.SetDescription(desccription)
         about.SetCopyright('(C) 2019 Bazyli Cyran')
         about.SetWebSite('https://bazylicyran.pl/')
