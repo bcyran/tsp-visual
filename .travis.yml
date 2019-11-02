@@ -79,12 +79,12 @@ jobs:
         - pip install -r requirements-build.txt
       script:
         - python -m build windows
-        - mv dist/tspvisual-windows dist/tspvisual-$TRAVIS_TAG-windows
+        - mv dist/tspvisual-windows.exe dist/tspvisual-$TRAVIS_TAG-windows.exe
       deploy:
         provider: releases
         api_key:
           secure: 1fPT/jwqGo6X3inDMF8/v6eBOvgQlr86rvclB/blpb77L3TGgeNCHL4D1D3ONhKR16yBniXEv343MxYmXMq6SIbmh5pysO+3Zj8WNG3I2vl4dpWvKZMkotdNXd/wevVIxprPIjdWpYNXgv3wpInCr8F+x+Nb0cZCI8zGYz0/V1/PH39qjF0AjVRqLqsmR3k/3EgBl0LlCo3UI7hR69Vdgm+lALo2r8yHBTO9AZl7RdnHy1cuyhn03eIvw1RVwN1/sRUvI8URFm7LxUcVGz/fd6ZUnP2pQRHfKXk6AeRb3jzDyexFon7FxB/mVcIuW01JypSwlxFLhn7nMXxvybgf3za+1Yz9qcBb6NZFRBmy8L2PEidDcKm6ooYsFaeHIOqNeYerktz+bOE0ZltoVErJrVf9ckRHGXAv1oxfI8Faz6VpdiiLO9xXiCfmtoHFRMJuWoB/NgN/xG7T5Q2dzppgblKrmTbV8CE/pRFAGFQdNTcGtWl0Gt9OK9xyhyvQ0L8gGUrTG+oqPPgU5klPijhMKtwWDETHhspDYAmMy/OhVAufHqvOAGrqKIb/Yo4fx5tSFb8Y6vuv/krETr8NhDUsoOr6OXGA0Dp148iGVuXJqDLktOJSlkZ7O7ciF5AQKPivzBR2/K4IiQmmIMbGtu5v47l1QHshmulcBUZl07IkHYY=
-        file: dist/tspvisual-$TRAVIS_TAG-windows
+        file: dist/tspvisual-$TRAVIS_TAG-windows.exe
         skip_cleanup: true
         draft: true
         overwrite: true
