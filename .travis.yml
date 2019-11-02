@@ -1,22 +1,30 @@
-language: python
-dist: bionic
-python:
-  - "3.7"
-  - "3.8"
-
-matrix:
-  include:
-    - os: windows
-      language: sh
-      python: "3.x"
-      before_install:
-        - choco install python3 --params "/InstallDir:C:\\Python"
-        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel
-
 install:
   - pip install -r requirements-test.txt
 
 script:
   - python -m unittest discover -s tests
   - flake8 tspvisual
+
+jobs:
+  include:
+    - name: "Python 3.7 on Linux"
+      stage: test
+      os: linux
+      dist: bionic
+      language: python
+      python: "3.7"
+    - name: "Python 3.8 on Linux"
+      stage: test
+      os: linux
+      dist: bionic
+      language: python
+      python: "3.8"
+    - name: "Python 3.x on Windows"
+      stage: test
+      os: windows
+      language: sh
+      python: "3.x"
+      before_install:
+        - choco install python3 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
