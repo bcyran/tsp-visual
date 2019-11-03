@@ -2,92 +2,94 @@ language: python
 cache: pip
 
 install:
-  - pip install -r requirements-test.txt
+- pip install -r requirements-test.txt
 
 script:
-  - python -m unittest discover -s tests
-  - flake8 tspvisual
+- python -m unittest discover -s tests
+- flake8 tspvisual
 
 jobs:
   include:
-    - name: 'Python 3.7 on Linux'
-      stage: test
-      os: linux
-      dist: bionic
-      language: python
-      python: '3.7'
-    - name: 'Python 3.8 on Linux'
-      stage: test
-      os: linux
-      dist: bionic
-      language: python
-      python: '3.8'
-    - name: 'Python 3.7 on Windows'
-      stage: test
-      os: windows
-      language: sh
-      python: '3.7'
-      before_install:
-        - choco install python3 --version=3.7.4 --params "/InstallDir:C:\\Python"
-        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel
-    - name: 'Python 3.8 on Windows'
-      stage: test
-      os: windows
-      language: sh
-      python: '3.7'
-      before_install:
-        - choco install python3 --version=3.8 --params "/InstallDir:C:\\Python"
-        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel
-    - name: 'PyInstaller on Linux'
-      stage: deploy
-      if: tag IS present
-      os: linux
-      dist: bionic
-      language: python
-      python: '3.7'
-      install:
-        - pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-18.04 -r requirements.txt
-        - pip install -r requirements-build.txt
-      script:
-        - python -m build linux
-        - mv dist/tspvisual-linux dist/tspvisual-$TRAVIS_TAG-linux
-      deploy:
-        provider: releases
-        api_key:
-          secure: 1fPT/jwqGo6X3inDMF8/v6eBOvgQlr86rvclB/blpb77L3TGgeNCHL4D1D3ONhKR16yBniXEv343MxYmXMq6SIbmh5pysO+3Zj8WNG3I2vl4dpWvKZMkotdNXd/wevVIxprPIjdWpYNXgv3wpInCr8F+x+Nb0cZCI8zGYz0/V1/PH39qjF0AjVRqLqsmR3k/3EgBl0LlCo3UI7hR69Vdgm+lALo2r8yHBTO9AZl7RdnHy1cuyhn03eIvw1RVwN1/sRUvI8URFm7LxUcVGz/fd6ZUnP2pQRHfKXk6AeRb3jzDyexFon7FxB/mVcIuW01JypSwlxFLhn7nMXxvybgf3za+1Yz9qcBb6NZFRBmy8L2PEidDcKm6ooYsFaeHIOqNeYerktz+bOE0ZltoVErJrVf9ckRHGXAv1oxfI8Faz6VpdiiLO9xXiCfmtoHFRMJuWoB/NgN/xG7T5Q2dzppgblKrmTbV8CE/pRFAGFQdNTcGtWl0Gt9OK9xyhyvQ0L8gGUrTG+oqPPgU5klPijhMKtwWDETHhspDYAmMy/OhVAufHqvOAGrqKIb/Yo4fx5tSFb8Y6vuv/krETr8NhDUsoOr6OXGA0Dp148iGVuXJqDLktOJSlkZ7O7ciF5AQKPivzBR2/K4IiQmmIMbGtu5v47l1QHshmulcBUZl07IkHYY=
-        file: dist/tspvisual-$TRAVIS_TAG-linux
-        skip_cleanup: true
-        draft: true
-        overwrite: true
-        on:
-          all_branches: true
-          tags: true
-    - name: 'PyInstaller on Windows'
-      stage: deploy
-      if: tag IS present
-      os: windows
-      language: sh
-      python: '3.7'
-      before_install:
-        - choco install python3 --version=3.7.4 --params "/InstallDir:C:\\Python"
-        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel
-      install:
-        - pip install -r requirements.txt
-        - pip install -r requirements-build.txt
-      script:
-        - python -m build windows
-        - mv dist/tspvisual-windows.exe dist/tspvisual-$TRAVIS_TAG-windows.exe
-      deploy:
-        provider: releases
-        api_key:
-          secure: 1fPT/jwqGo6X3inDMF8/v6eBOvgQlr86rvclB/blpb77L3TGgeNCHL4D1D3ONhKR16yBniXEv343MxYmXMq6SIbmh5pysO+3Zj8WNG3I2vl4dpWvKZMkotdNXd/wevVIxprPIjdWpYNXgv3wpInCr8F+x+Nb0cZCI8zGYz0/V1/PH39qjF0AjVRqLqsmR3k/3EgBl0LlCo3UI7hR69Vdgm+lALo2r8yHBTO9AZl7RdnHy1cuyhn03eIvw1RVwN1/sRUvI8URFm7LxUcVGz/fd6ZUnP2pQRHfKXk6AeRb3jzDyexFon7FxB/mVcIuW01JypSwlxFLhn7nMXxvybgf3za+1Yz9qcBb6NZFRBmy8L2PEidDcKm6ooYsFaeHIOqNeYerktz+bOE0ZltoVErJrVf9ckRHGXAv1oxfI8Faz6VpdiiLO9xXiCfmtoHFRMJuWoB/NgN/xG7T5Q2dzppgblKrmTbV8CE/pRFAGFQdNTcGtWl0Gt9OK9xyhyvQ0L8gGUrTG+oqPPgU5klPijhMKtwWDETHhspDYAmMy/OhVAufHqvOAGrqKIb/Yo4fx5tSFb8Y6vuv/krETr8NhDUsoOr6OXGA0Dp148iGVuXJqDLktOJSlkZ7O7ciF5AQKPivzBR2/K4IiQmmIMbGtu5v47l1QHshmulcBUZl07IkHYY=
-        file: dist/tspvisual-$TRAVIS_TAG-windows.exe
-        skip_cleanup: true
-        draft: true
-        overwrite: true
-        on:
-          all_branches: true
-          tags: true
+  - name: Python 3.7 on Linux
+    stage: test
+    os: linux
+    dist: bionic
+    language: python
+    python: '3.7'
+  - name: Python 3.8 on Linux
+    stage: test
+    os: linux
+    dist: bionic
+    language: python
+    python: '3.8'
+  - name: Python 3.7 on Windows
+    stage: test
+    os: windows
+    language: sh
+    python: '3.7'
+    before_install:
+    - choco install python3 --version=3.7.4 --params "/InstallDir:C:\\Python"
+    - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+    - python -m pip install --upgrade pip wheel
+  - name: Python 3.8 on Windows
+    stage: test
+    os: windows
+    language: sh
+    python: '3.8'
+    before_install:
+    - choco install python3 --version=3.8 --params "/InstallDir:C:\\Python"
+    - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+    - python -m pip install --upgrade pip wheel
+  - name: PyInstaller on Linux
+    stage: deploy
+    if: tag IS present
+    os: linux
+    dist: bionic
+    language: python
+    python: '3.7'
+    install:
+    - pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-18.04 -r requirements.txt
+    - pip install -r requirements-build.txt
+    script:
+    - python -m build linux
+    - mv dist/tspvisual-linux dist/tspvisual-${TRAVIS_TAG}-linux
+    deploy:
+      provider: releases
+      api_key:
+        secure: WLH+ANJmyDGDESuwhom5T71p959VgXMkUr/t+emEJLzvM8EdMmkT+B7dREDuEE1YrfCNKKjtzBE1hH7Kcf1Ezk4u/LrbyxdH3lIF/1PPsy6hHCIxy7PULUmms7JRoFxMxEiY7pw5We5O3+8rgeUu6OGh6RCv3g6lA8nceq+++hmjqxu3BIfxNhGbwFJ0bB5UbQjQw2prVZj9i70QvwrkupV9lfWp6fCPq19AHy3sVOEALOlrJAAeuTPIqSLloPN1CUw+AmjYd0rzisLuv66bNxBodM9RyXfQU1aktntP/Hv3cHbe4yww785INO5BfEhPBU6JWWR8Ms+eN1o1FM3upF96EfoI5J3t6IoqHVKeapG4zUoqzh15P5N4bYCF591kmhiUu2dWitqb9LmJkJ6P2uPz+o6WD7sVmTbLAB7NkYnc+nsWPsDksPLconbieyZWJKBoETxr26cs5bR25yloF1FbLyLzkEZNjquF7O+5qfiu54b25hCua55SfmVD4kijaLpqkpIeF9IyoBg95+ygayUi8GuwlGCy21K6/tP7WrqGbTZZJYNrULbLzf2Yh9bKS8Tb56yoW2ULXByE1KJcY5Swr+C5Ciy5dYeRf/k3rbNHvVHYrUPcq2VBTuPUzOUsrFT3I8SvD2dXJDpmmF07aJ4VRtw6BLxeV2o6eMb1Xpw=
+      file: dist/tspvisual-${TRAVIS_TAG}-linux
+      skip_cleanup: true
+      draft: true
+      overwrite: true
+      on:
+        repo: bcyran/tsp-visual
+        all_branches: true
+        tags: true
+  - name: PyInstaller on Windows
+    stage: deploy
+    if: tag IS present
+    os: windows
+    language: sh
+    python: '3.7'
+    before_install:
+    - choco install python3 --version=3.7.4 --params "/InstallDir:C:\\Python"
+    - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+    - python -m pip install --upgrade pip wheel
+    install:
+    - pip install -r requirements.txt
+    - pip install -r requirements-build.txt
+    script:
+    - python -m build windows
+    - mv dist/tspvisual-windows.exe dist/tspvisual-${TRAVIS_TAG}-windows.exe
+    deploy:
+      provider: releases
+      api_key:
+        secure: WLH+ANJmyDGDESuwhom5T71p959VgXMkUr/t+emEJLzvM8EdMmkT+B7dREDuEE1YrfCNKKjtzBE1hH7Kcf1Ezk4u/LrbyxdH3lIF/1PPsy6hHCIxy7PULUmms7JRoFxMxEiY7pw5We5O3+8rgeUu6OGh6RCv3g6lA8nceq+++hmjqxu3BIfxNhGbwFJ0bB5UbQjQw2prVZj9i70QvwrkupV9lfWp6fCPq19AHy3sVOEALOlrJAAeuTPIqSLloPN1CUw+AmjYd0rzisLuv66bNxBodM9RyXfQU1aktntP/Hv3cHbe4yww785INO5BfEhPBU6JWWR8Ms+eN1o1FM3upF96EfoI5J3t6IoqHVKeapG4zUoqzh15P5N4bYCF591kmhiUu2dWitqb9LmJkJ6P2uPz+o6WD7sVmTbLAB7NkYnc+nsWPsDksPLconbieyZWJKBoETxr26cs5bR25yloF1FbLyLzkEZNjquF7O+5qfiu54b25hCua55SfmVD4kijaLpqkpIeF9IyoBg95+ygayUi8GuwlGCy21K6/tP7WrqGbTZZJYNrULbLzf2Yh9bKS8Tb56yoW2ULXByE1KJcY5Swr+C5Ciy5dYeRf/k3rbNHvVHYrUPcq2VBTuPUzOUsrFT3I8SvD2dXJDpmmF07aJ4VRtw6BLxeV2o6eMb1Xpw=
+      file: dist/tspvisual-${TRAVIS_TAG}-windows.exe
+      skip_cleanup: true
+      draft: true
+      overwrite: true
+      on:
+        repo: bcyran/tsp-visual
+        all_branches: true
+        tags: true
