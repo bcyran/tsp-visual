@@ -58,7 +58,6 @@ jobs:
       provider: releases
       file: dist/*
       skip_cleanup: true
-      draft: true
       overwrite: true
       on:
         tags: true
@@ -83,7 +82,6 @@ jobs:
       provider: releases
       file: dist/*
       skip_cleanup: true
-      draft: true
       overwrite: true
       on:
         tags: true
