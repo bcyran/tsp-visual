@@ -56,7 +56,7 @@ jobs:
     deploy:
       edge: true
       provider: releases
-      file: dist/tspvisual-${TRAVIS_TAG}-linux
+      file: dist/*
       skip_cleanup: true
       draft: true
       overwrite: true
@@ -81,7 +81,7 @@ jobs:
     deploy:
       edge: true
       provider: releases
-      file: dist/tspvisual-${TRAVIS_TAG}-windows.exe
+      file: dist/*
       skip_cleanup: true
       draft: true
       overwrite: true
