@@ -54,16 +54,13 @@ jobs:
     - python -m build linux
     - mv dist/tspvisual-linux dist/tspvisual-${TRAVIS_TAG}-linux
     deploy:
+      edge: true
       provider: releases
-      api_key:
-        secure: WLH+ANJmyDGDESuwhom5T71p959VgXMkUr/t+emEJLzvM8EdMmkT+B7dREDuEE1YrfCNKKjtzBE1hH7Kcf1Ezk4u/LrbyxdH3lIF/1PPsy6hHCIxy7PULUmms7JRoFxMxEiY7pw5We5O3+8rgeUu6OGh6RCv3g6lA8nceq+++hmjqxu3BIfxNhGbwFJ0bB5UbQjQw2prVZj9i70QvwrkupV9lfWp6fCPq19AHy3sVOEALOlrJAAeuTPIqSLloPN1CUw+AmjYd0rzisLuv66bNxBodM9RyXfQU1aktntP/Hv3cHbe4yww785INO5BfEhPBU6JWWR8Ms+eN1o1FM3upF96EfoI5J3t6IoqHVKeapG4zUoqzh15P5N4bYCF591kmhiUu2dWitqb9LmJkJ6P2uPz+o6WD7sVmTbLAB7NkYnc+nsWPsDksPLconbieyZWJKBoETxr26cs5bR25yloF1FbLyLzkEZNjquF7O+5qfiu54b25hCua55SfmVD4kijaLpqkpIeF9IyoBg95+ygayUi8GuwlGCy21K6/tP7WrqGbTZZJYNrULbLzf2Yh9bKS8Tb56yoW2ULXByE1KJcY5Swr+C5Ciy5dYeRf/k3rbNHvVHYrUPcq2VBTuPUzOUsrFT3I8SvD2dXJDpmmF07aJ4VRtw6BLxeV2o6eMb1Xpw=
       file: dist/tspvisual-${TRAVIS_TAG}-linux
       skip_cleanup: true
       draft: true
       overwrite: true
       on:
-        repo: bcyran/tsp-visual
-        all_branches: true
         tags: true
   - name: PyInstaller on Windows
     stage: deploy
@@ -82,14 +79,11 @@ jobs:
     - python -m build windows
     - mv dist/tspvisual-windows.exe dist/tspvisual-${TRAVIS_TAG}-windows.exe
     deploy:
+      edge: true
       provider: releases
-      api_key:
-        secure: WLH+ANJmyDGDESuwhom5T71p959VgXMkUr/t+emEJLzvM8EdMmkT+B7dREDuEE1YrfCNKKjtzBE1hH7Kcf1Ezk4u/LrbyxdH3lIF/1PPsy6hHCIxy7PULUmms7JRoFxMxEiY7pw5We5O3+8rgeUu6OGh6RCv3g6lA8nceq+++hmjqxu3BIfxNhGbwFJ0bB5UbQjQw2prVZj9i70QvwrkupV9lfWp6fCPq19AHy3sVOEALOlrJAAeuTPIqSLloPN1CUw+AmjYd0rzisLuv66bNxBodM9RyXfQU1aktntP/Hv3cHbe4yww785INO5BfEhPBU6JWWR8Ms+eN1o1FM3upF96EfoI5J3t6IoqHVKeapG4zUoqzh15P5N4bYCF591kmhiUu2dWitqb9LmJkJ6P2uPz+o6WD7sVmTbLAB7NkYnc+nsWPsDksPLconbieyZWJKBoETxr26cs5bR25yloF1FbLyLzkEZNjquF7O+5qfiu54b25hCua55SfmVD4kijaLpqkpIeF9IyoBg95+ygayUi8GuwlGCy21K6/tP7WrqGbTZZJYNrULbLzf2Yh9bKS8Tb56yoW2ULXByE1KJcY5Swr+C5Ciy5dYeRf/k3rbNHvVHYrUPcq2VBTuPUzOUsrFT3I8SvD2dXJDpmmF07aJ4VRtw6BLxeV2o6eMb1Xpw=
       file: dist/tspvisual-${TRAVIS_TAG}-windows.exe
       skip_cleanup: true
       draft: true
       overwrite: true
       on:
-        repo: bcyran/tsp-visual
-        all_branches: true
         tags: true
