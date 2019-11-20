@@ -87,6 +87,12 @@ class TSSolver(Solver):
                         stop_counter >= self.stop_threshold:
                     break
 
+                # Restart with random solution if reset threshold is exceeded
+                if reset_counter >= self.reset_threshold:
+                    cur_path.shuffle(0, self.tsp.dimension + 1)
+                    cur_path.distance = self.tsp.path_dist(cur_path)
+                    reset_counter = 0
+
             self._update_tabu()
 
             # Terminate search after exceeding specified runtime
