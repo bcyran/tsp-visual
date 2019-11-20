@@ -3,7 +3,7 @@ import wx.adv
 import wx.lib.inspection
 from pubsub import pub
 
-from tspvisual.gui.export import export_results, export_tour
+from tspvisual.gui.export import export_results, export_scr, export_tour
 from tspvisual.gui.helpers import borders
 from tspvisual.gui.solver_stats import SolverStats
 from tspvisual.gui.solver_view import SolverView
@@ -53,6 +53,8 @@ class TSPVisual(wx.Frame):
             wx.ID_ANY, 'Export best graph', 'Export best graph.')
         self.export_c_graph_mi = data_menu.Append(
             wx.ID_ANY, 'Export current graph', 'Export current graph.')
+        self.export_vis = data_menu.Append(
+            wx.ID_ANY, 'Export visualisation', 'Export visualisation image')
         self.export_tour = data_menu.Append(
             wx.ID_ANY, 'Export tour',
             'Export the best tour found during the last solver run.')
@@ -64,7 +66,7 @@ class TSPVisual(wx.Frame):
         self.SetMenuBar(menu_bar)
 
         # Main layout
-        panel = wx.Panel(self)
+        self.panel = panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Title
@@ -95,6 +97,7 @@ class TSPVisual(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_data_export, export_data_mi)
         self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_b_graph_mi)
         self.Bind(wx.EVT_MENU, self._on_graph_export, self.export_c_graph_mi)
+        self.Bind(wx.EVT_MENU, self._on_vis_export, self.export_vis)
         self.Bind(wx.EVT_MENU, self._on_tour_export, self.export_tour)
         self.Bind(wx.EVT_MENU, self._on_about, about_mi)
         pub.subscribe(self._on_tsp_change, 'TSP_CHANGE')
@@ -181,6 +184,42 @@ class TSPVisual(wx.Frame):
         else:
             wx.MessageBox('Error while exporting graph.', 'Error',
                           wx.ICON_ERROR | wx.OK)
+
+    def _on_vis_export(self, event):
+        """Handles exporting of the TSP visualisation.
+        """
+
+        # Show error and return if there is no visualisation
+        if not self._tsp:
+            wx.MessageBox('No visualisation to export.', 'Error',
+                          wx.ICON_ERROR | wx.OK)
+            return
+
+        # I don't like this but it works
+        panel_rect = self.panel.GetScreenRect()
+        rect = self.solver_view.tsp_view.GetScreenRect()
+        rect.x -= panel_rect.x
+        rect.y -= panel_rect.y
+
+        # Wildcards for the file picker
+        image_wildcards = 'PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg|' \
+                          'BMP files (*.bmp)|*.bmp'
+        # Present file picker and try to load selected instance
+        with (wx.FileDialog(self, 'Save solver data.',
+              wildcard=image_wildcards,
+              style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)) as file_dialog:
+
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return
+
+            file = file_dialog.GetPath()
+
+        try:
+            export_scr(file, rect, self)
+            wx.MessageBox('Data exported successfully.', 'Success',
+                          wx.ICON_INFORMATION | wx.OK)
+        except Exception as e:
+            wx.MessageBox(str(e), 'Error', wx.ICON_ERROR | wx.OK)
 
     def _on_tour_export(self, event):
         """Handles tour export.
