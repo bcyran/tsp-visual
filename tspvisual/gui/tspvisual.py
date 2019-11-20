@@ -46,22 +46,22 @@ class TSPVisual(wx.Frame):
         close_mi = file_menu.Append(wx.ID_CLOSE, 'Close', 'Close instance.')
         file_menu.AppendSeparator()
         exit_mi = file_menu.Append(wx.ID_EXIT, 'Exit', 'Exit application.')
-        data_menu = wx.Menu()
-        export_data_mi = data_menu.Append(
-            wx.ID_ANY, 'Export data', 'Export current solver data.')
-        self.export_b_graph_mi = data_menu.Append(
-            wx.ID_ANY, 'Export best graph', 'Export best graph.')
-        self.export_c_graph_mi = data_menu.Append(
-            wx.ID_ANY, 'Export current graph', 'Export current graph.')
-        self.export_vis = data_menu.Append(
-            wx.ID_ANY, 'Export visualisation', 'Export visualisation image')
-        self.export_tour = data_menu.Append(
-            wx.ID_ANY, 'Export tour',
+        export_menu = wx.Menu()
+        export_data_mi = export_menu.Append(
+            wx.ID_ANY, 'Solver data', 'Export current solver data.')
+        self.export_b_graph_mi = export_menu.Append(
+            wx.ID_ANY, 'Best graph', 'Export best graph.')
+        self.export_c_graph_mi = export_menu.Append(
+            wx.ID_ANY, 'Current graph', 'Export current graph.')
+        self.export_vis = export_menu.Append(
+            wx.ID_ANY, 'Visualisation', 'Export screenshot of visualisation')
+        self.export_tour = export_menu.Append(
+            wx.ID_ANY, 'Tour',
             'Export the best tour found during the last solver run.')
         help_menu = wx.Menu()
         about_mi = help_menu.Append(wx.ID_ANY, 'About', 'About this program.')
         menu_bar.Append(file_menu, 'File')
-        menu_bar.Append(data_menu, 'Data')
+        menu_bar.Append(export_menu, 'Export')
         menu_bar.Append(help_menu, 'Help')
         self.SetMenuBar(menu_bar)
 
