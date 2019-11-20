@@ -323,11 +323,12 @@ class TSPView(wx.Panel):
     """
 
     PADDING = 20
-    CITY_RADIUS = 2
+    CITY_RADIUS = 3
     CITY_COLOR = 'black'
     CURRENT_COLOR = 'black'
     BEST_COLOR = 'red'
     OPT_COLOR = 'light gray'
+    PATH_WIDTH = 2
 
     def __init__(self, parent):
         super(TSPView, self).__init__(parent)
@@ -402,7 +403,7 @@ class TSPView(wx.Panel):
         """Utility method to draw a path on the given device context.
         """
 
-        dc.SetPen(wx.Pen(color))
+        dc.SetPen(wx.Pen(color, width=self.PATH_WIDTH))
         for i in range(len(path) - 1):
             if path[i] == -1 or path[i + 1] == -1:
                 continue
