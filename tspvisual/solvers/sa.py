@@ -12,18 +12,18 @@ class SASolver(Solver):
 
     name = 'Simulated Annealing'
     properties = [
-        Property('Initial temperature', 'init_temp', float, 100),
-        Property('End temperature', 'end_temp', float, 0.1),
-        Property('Cooling rate', 'cooling_rate', float, 0.01),
+        Property('Initial temperature', 'init_temp', float, 1000),
+        Property('End temperature', 'end_temp', float, 0.01),
+        Property('Cooling rate', 'cooling_rate', float, 0.001),
         Property('Neighbourhood', 'neighbourhood', Neighbourhood, 'INVERT'),
         Property('Run time [ms]', 'run_time', int, 0)
     ]
 
     def __init__(self):
         super().__init__()
-        self.init_temp = 100
-        self.end_temp = 0.1
-        self.cooling_rate = 0.01
+        self.init_temp = 1000
+        self.end_temp = 0.01
+        self.cooling_rate = 0.001
         self.neighbourhood = Neighbourhood.INVERT
         self.run_time = 0
 
