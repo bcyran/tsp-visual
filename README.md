@@ -1,5 +1,7 @@
 # TSP Visual
 
+![Build status](https://travis-ci.org/bcyran/tsp-visual.svg?branch=master)
+
 ![Screenshot of TSP Visual](screenshot.png)
 
 ## About
