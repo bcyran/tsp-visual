@@ -13,11 +13,11 @@ class TSSolver(Solver):
 
     name = "Tabu Search"
     properties = [
-        Property('Iterations', 'iterations', int, 1000),
+        Property('Iterations', 'iterations', int, 100),
         Property('Cadence', 'cadence', int, 18),
         Property('Neighbourhood', 'neighbourhood', Neighbourhood, 'INVERT'),
         Property('Reset threshold', 'reset_threshold', int, 45),
-        Property('Stop threshold', 'stop_threshold', int, 450),
+        Property('Stop threshold', 'stop_threshold', int, 100),
         Property('Run time', 'run_time', int, 0)
     ]
 
